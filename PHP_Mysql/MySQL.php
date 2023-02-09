@@ -35,7 +35,8 @@ class MySQL{ // 사용시 클래스 (AUtO) 로드 필요
                     $_SESSION[self::MYSQL]  = $conn;
                     $this->connection = $conn;
                 } else {
-                    print_r(mysqli_connect_error());
+                    $type = "CONNECTION ERROR";
+                    self::console_log($type , mysqli_connect_error());
                 }
             } else {
                 $conn = $_SESSION[self::MYSQL];
@@ -43,14 +44,14 @@ class MySQL{ // 사용시 클래스 (AUtO) 로드 필요
 
             $this->connection = $conn;
         } catch (mysqli_sql_exception $error) {
-            $type = "CONECTION ERROR";
+            $type = "CONNECTION ERROR";
             self::console_log($type, $error->getMessage());
             return false;
         }
     }
 
     function __destruct(){ //생성자 제거
-        // session_destroy();//로컬 테스트시 사용
+        // unset($_SESSION[self::MYSQL]); //로컬 테스트시 사용
         $this->clear();
     }
 
@@ -120,12 +121,17 @@ class MySQL{ // 사용시 클래스 (AUtO) 로드 필요
                     $aliasCount = true;
                 }
 
-                if($text  == "count()" || $aliasCount){//count함수가 있으면 true;
+            }
+
+            if($text  == "count()" || $aliasCount){//count함수가 있으면 true;
+                if($value != 0){
                     $objCount->count = $value;
-                    return $objCount;
                 }else{
-                    return false;
+                    $objCount->count = null;
                 }
+                return $objCount;
+            }else{
+                return false;
             }
 
         }else{
@@ -143,6 +149,7 @@ class MySQL{ // 사용시 클래스 (AUtO) 로드 필요
         
         // SQL ERROR : SQL 에러일 경우
         // CONNECTION ERROR : 연결정보 오류일 경유
+        // NONE : 설정된 에러항목이 없음
 
         $text = "";
         $errorType = "";
@@ -172,12 +179,13 @@ class MySQL{ // 사용시 클래스 (AUtO) 로드 필요
                 $text = $error_message;
                 $errorType = "SQL ERROR";
                 break;
-            case "CONECTION ERROR":
+            case "CONNECTION ERROR":
                 $text = $error_message;
-                $errorType = "CONECTION ERROR";
+                $errorType = "CONNECTION ERROR";
                 break;
             default:
-                $text = $error_message;
+                $text = "설정된 에러항목이 없습니다.";
+                $errorType  = "NONE";
                 break;
         } 
         $script = '<script>console.log("' . $errorType  . ' : '  . $text . '");</script>';
@@ -242,6 +250,7 @@ class MySQL{ // 사용시 클래스 (AUtO) 로드 필요
                     $statement->close();
                     return false;
                 }
+                
             }
    
         } catch (mysqli_sql_exception $error) {
@@ -299,8 +308,21 @@ class MySQL{ // 사용시 클래스 (AUtO) 로드 필요
         
         $objList = array();//객체 리스트를 담을 배열 생성
         $listCount = self::countCheck($list); //count를 구하는지 체크
-    
-        if(count($list) == 0 && empty($listCount->count)){
+
+        // $listCountCheck = 0;
+
+        // foreach($list as $key => $item){ //count수가 0인값 일 경우 표출 X 
+        //     if(count($item) == 1){
+        //         $key = key($item);
+        //         $listCountCheck = $item[$key];
+        //     }else{
+        //         $listCountCheck = 1;
+        //     }
+        // }
+
+        // if($listCountCheck == 0 && $listCount->count == null){
+            
+        if(count($list) == 0 && $listCount->count == null){ //0개여도 return
             $type = "NO SELECT DATA";
             self::console_log($type);
             return false;
@@ -311,10 +333,10 @@ class MySQL{ // 사용시 클래스 (AUtO) 로드 필요
             //리스트
             foreach ($list as $key => $item) {
                 $obj = new stdClass;
-                $column = array_keys($list[$key]);//key이름만 배열 형태로 전환
-
+                $column = array_keys($item);//key이름만 배열 형태로 전환
+                
                 foreach ($column as $columnName) {
-                    $obj->$columnName = htmlspecialchars($list[$key][$columnName]);
+                    $obj->$columnName = htmlspecialchars($item[$columnName]);
                     //객체->키이름 = value값을 담아준다. htmlspecialchars : XSS 방지
                 }
                 $objList[$key] = $obj;
@@ -326,16 +348,16 @@ class MySQL{ // 사용시 클래스 (AUtO) 로드 필요
             //단일
             foreach ($list as $key => $item) {
                 $obj = new stdClass;
-                $column = array_keys($list[$key]);//key이름만 배열 형태로 전환
+                $column = array_keys($item);//key이름만 배열 형태로 전환
                 
                 $countCheck = self::countCheck($list);//컬럼이 count인지 아닌지 확인
 
                 foreach ($column as $columnName) {
                     if($countCheck->count > 0){//갯수를 구할 시 갯수만 리턴
-                         $count = htmlspecialchars($list[$key][$columnName]);
+                         $count = htmlspecialchars($item[$columnName]);
                          return $count; //실제 갯수만 리턴
                     }else{
-                        $obj->$columnName = htmlspecialchars($list[$key][$columnName]);
+                        $obj->$columnName = htmlspecialchars($item[$columnName]);
                         //객체->키이름 = value값을 담아준다. htmlspecialchars : XSS 방지
                     }
                 }
