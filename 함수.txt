@@ -1,0 +1,5 @@
+urlencode() : url을 이용해 데이터를 전송하고자 할 대 사용 
+
+str_replace() : ("해당문자" , "바꿀문자" ,"문장열");
+
+htmlspecialchars() : HTML엔티티로 인코딩하여 레이아웃, 스크립트 오류를 방지
