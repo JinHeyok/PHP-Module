@@ -24,8 +24,8 @@ $db = new MySQL;
 //DB CLASS 생성
 
 //셀렉트 쿼리형 타입
-$selectQuery = "SELECT * FROM store_user WHERE su_index = ? OR su_index = ? OR su_index = ?;";
-$selectData = array(1, 200, 300);
+$selectQuery = "SELECT * FROM store_user;";
+$selectData = array();
 $selectList = $db->select($selectQuery, $selectData);
 
 print_r($selectList);
