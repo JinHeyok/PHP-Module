@@ -164,6 +164,37 @@ class File{
         }
     }
 
+    function allDownload($result, $path){// 연속다운로드 
+
+        if(in_arraY($result , self::FILTER)){
+            self::error_log("NOT FILE");
+            return false;
+        }
+
+        foreach($result as $key => $file){
+            if(file_exists($path . $file)){
+
+                $fileName = $path . $file;
+
+                print_r(
+                "<script>
+                function download(){
+                    var file =  '" . $fileName . "';
+                    var a = document.createElement('a');
+                    a.href = file;
+                    a.download = file;
+                    a.click();
+                }
+                download();
+            </script>");
+            //....이렇게 해도 되는걸까..?
+
+
+            }
+        }
+
+
+    }
 
 
 }

@@ -70,11 +70,27 @@ spl_autoload_register("classAutoload");
     
     //압축해서 파일 다운로드
 
-    $obj = new stdClass;
-    $obj->path = "upload/";
-    $obj->file = array("2023_02_14_064749_sample_images_03.png" , "2023_02_14_064749_sample_images_04.png");
+    // $obj = new stdClass;
+    // $obj->path = "upload/";
+    // $obj->file = array("2023_02_14_064749_sample_images_03.png" , "2023_02_14_064749_sample_images_04.png");
     // $fileClass->zipDownload($obj); 
     //해당 파일 경로 , 압축해서 다운받을 파일들(배열)
+
+    //압축해서 파일 다운로드
+    
+    // 연속 다운로드
+
+    $fileArray = array(
+        "2023_02_14_064749_sample_images_03.png",
+        "2023_02_14_064749_sample_images_04.png",
+        "2023_02_14_064749_sample_images_05.png",
+    );
+    
+    $fileClass->allDownload($fileArray , $uploaddir);
+
+    // 연속 다운로드
+
+
 
     //압축파일 업로드 
     
