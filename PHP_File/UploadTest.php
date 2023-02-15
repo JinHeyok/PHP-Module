@@ -27,7 +27,7 @@ spl_autoload_register("classAutoload");
 
 <form action="" method="POST" enctype="multipart/form-data">
     <input type="file" name="myfile" id="myfile"><!-- 단일업로드 -->
-    <input type="file" name="multifile[]" multiple> <!-- 다중업로드 name=[] 배열표시 key값안에 배열이 존재하게 된다.-->
+    <input type="file" name="multifile[]" id="mutifile" multiple> <!-- 다중업로드 name=[] 배열표시 key값안에 배열이 존재하게 된다.-->
     <input type="submit" name="action" value="upload">
 </form>
 
@@ -37,8 +37,8 @@ spl_autoload_register("classAutoload");
 
     $fileClass = new File;
 
-    // $file = $_FILES['myfile']; //단일 
-    $file = $_FILES['multifile'];//다중 (multiful)
+    $file = $_FILES['myfile']; //단일 
+    // $file = $_FILES['multifile'];//다중 (multiful)
     
     $uploaddir = "upload/"; //경로 
     
@@ -58,41 +58,51 @@ spl_autoload_register("classAutoload");
     
     //move_uploaded_file(tmp_name, 경로를포함한 파일이름지정)
     //임시 저장된 파일을 해당경로 이름으로 업로드한다.
-    
 
     //단일 파일 업로드 
-    // $fileClass->singleFileUplaod($file , $uploaddir ,  false , "image"); 
-    // 파일객체 , 경로 ,  uuid 사용여부 , 업로드할 파일 타입(check타입)
+    $fileClass->singleFileUplaod($file , $uploaddir ,  "image" , false); 
+    // singleFileUpload(파일객체 , 경로  , 업로드할 파일 타입(check타입) ,  uuid 사용여부(default = false));
 
     //다중 파일 업로드 (multiful type)
-    // $fileClass->multifulFileUpload($file, $uploaddir ,  false , "이미지" );
-    // 배열(key이름마다 value는 배열로 이루어져있음) , 경로 , uuid 사용여부, 업로드할 파일 타입(check타입)
+    // $fileClass->multifulFileUpload($file, $uploaddir , "이미지", false );
+    // multifulUpload(배열(key이름마다 value는 배열로 이루어져있음) , 경로 ,  업로드할 파일 타입(check타입) , uuid 사용여부(defalt = false))
     
     //압축해서 파일 다운로드
-
-    // $obj = new stdClass;
-    // $obj->path = "upload/";
-    // $obj->file = array("2023_02_14_064749_sample_images_03.png" , "2023_02_14_064749_sample_images_04.png");
+    $obj = new stdClass;
+    // $obj->path = "";
+    // $obj->file = array("upload/2023_02_14_064749_sample_images_03.png" , "upload/2023_02_14_064749_sample_images_04.png");
+    // $obj = array("upload/2023_02_14_064749_sample_images_03.png" , "upload/2023_02_14_064749_sample_images_04.png");
     // $fileClass->zipDownload($obj); 
     //해당 파일 경로 , 압축해서 다운받을 파일들(배열)
+    // zipDownload(오브젝트 방식 OR  배열방식(경로가 포함되어야함) , 필요할시 경로입력);
 
-    //압축해서 파일 다운로드
-    
-    // 연속 다운로드
-
-    $fileArray = array(
-        "2023_02_14_064749_sample_images_03.png",
-        "2023_02_14_064749_sample_images_04.png",
-        "2023_02_14_064749_sample_images_05.png",
-    );
-    
-    $fileClass->allDownload($fileArray , $uploaddir);
-
-    // 연속 다운로드
-
-
+    // 연속 다운로드 (파일명만 있을경우)
+    // $fileArray = array(
+    //     "upload/2023_02_14_064749_sample_images_03.png",
+    //     "upload/2023_02_14_064749_sample_images_04.png",
+    //     "upload/2023_02_14_064749_sample_images_05.png",
+    // );
+    // $fileClass->allDownload($fileArray);
+    // allDownload(배열(파일이름) , 경로);
 
     //압축파일 업로드 
+
+    //압축해서 기존파일 업로드 하기
+    // $obj = new stdClass;
+    // $obj->path = "";
+    // $obj->file = array("test/upload/2023_02_14_064749_sample_images_03.png" , "test/upload/2023_02_14_064749_sample_images_04.png");
+    // $obj = array("upload/2023_02_14_064749_sample_images_03.png" , "upload/2023_02_14_064749_sample_images_04.png");
+    // $fileClass->zipUpload($obj); 
+    // zipUpload(오브젝트 OR 배열 (파일이름) , 필요시 경로);
+
+    //압축해서 기존파일 업로드 하기
+
+    // 압축해서 업로드 다중 (multiful)
+    // $file = $_FILES['multifile'];
+    // $fileClass->zipUpload($file , $uploaddir);
+    // zipUpload(파일 오브젝트(multiful , 필요시 , 경로));
+
+    // 압축해서 업로드 
     
     //압축파일 생성 후 다운로드
     // $zip = new ZipArchive;
@@ -134,7 +144,64 @@ spl_autoload_register("classAutoload");
 <!-- 단일 다운로드  -->
 
 
-<!-- 리스트 다운로드  -->
+<!-- script 리스트 upload -->
+<div class="fileList">
+</div>
+<button type="button">버튼</button>
 
-<!-- 리스트 다운로드  -->
+<!-- script 리스트 upload 테스트 -->
 
+<script>
+
+    var fileInput = document.querySelector('#myfile');
+    var uploadButton = document.querySelector("button");
+    var uploadFileList = [];
+
+    fileInput.addEventListener("change", function(){
+
+        // console.log(fileInput.files[0]); //파일객체
+        uploadFileList.push(fileInput.files[0]);
+
+        var p  = document.createElement("p");
+        p.textContent = "업로드 파일 : " + fileInput.files[0]['name'];
+
+        document.querySelector(".fileList").appendChild(p);
+
+    });
+
+    uploadButton.addEventListener("click" , function(){
+
+        var formData = new FormData;
+
+        var test = [
+        "upload/2023_02_14_064749_sample_images_03.png",
+        "upload/2023_02_14_064749_sample_images_04.png",
+        "upload/2023_02_14_064749_sample_images_05.png",
+        ];
+
+        uploadFileList.forEach((data , index) => {
+            formData.append("fileList" + index ,  data);
+        }); 
+        formData.append("fileCount" , uploadFileList.length);
+        formData.append("testFileList" , test);
+
+        const requset = new XMLHttpRequest;
+
+        requset.open("POST" , "./UploadTest2.php");
+        requset.addEventListener("readystatechange" , function(){
+            if(requset.readyState == XMLHttpRequest.DONE){
+                if(requset.status === 200){
+                    console.log(requset.response);
+                    const response = JSON.parse(requset.response);
+                    console.log(response);
+                }
+            }
+        });
+        requset.send(formData);
+    });
+
+    
+
+</script>
+
+<!-- script 리스트 upload 테스트-->
