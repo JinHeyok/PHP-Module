@@ -37,8 +37,8 @@ spl_autoload_register("classAutoload");
 
     $fileClass = new File;
 
-    $file = $_FILES['myfile']; //단일 
-    // $file = $_FILES['multifile'];//다중 (multiful)
+    // $file = $_FILES['myfile']; //단일 
+    $file = $_FILES['multifile'];//다중 (multiful)
     
     $uploaddir = "upload/"; //경로 
     
@@ -60,15 +60,15 @@ spl_autoload_register("classAutoload");
     //임시 저장된 파일을 해당경로 이름으로 업로드한다.
 
     //단일 파일 업로드 
-    $fileClass->singleFileUplaod($file , $uploaddir ,  "image" , false); 
+    // $fileClass->singleFileUplaod($file , $uploaddir ,  "image" , false); 
     // singleFileUpload(파일객체 , 경로  , 업로드할 파일 타입(check타입) ,  uuid 사용여부(default = false));
 
     //다중 파일 업로드 (multiful type)
-    // $fileClass->multifulFileUpload($file, $uploaddir , "이미지", false );
+    // $fileClass->multifulFileUpload($file, $uploaddir , "pdf", false );
     // multifulUpload(배열(key이름마다 value는 배열로 이루어져있음) , 경로 ,  업로드할 파일 타입(check타입) , uuid 사용여부(defalt = false))
     
     //압축해서 파일 다운로드
-    $obj = new stdClass;
+    // $obj = new stdClass;
     // $obj->path = "";
     // $obj->file = array("upload/2023_02_14_064749_sample_images_03.png" , "upload/2023_02_14_064749_sample_images_04.png");
     // $obj = array("upload/2023_02_14_064749_sample_images_03.png" , "upload/2023_02_14_064749_sample_images_04.png");
@@ -87,15 +87,15 @@ spl_autoload_register("classAutoload");
 
     //압축파일 업로드 
 
-    //압축해서 기존파일 업로드 하기
+    // //압축해서 기존파일 다운로드 하기
     // $obj = new stdClass;
     // $obj->path = "";
     // $obj->file = array("test/upload/2023_02_14_064749_sample_images_03.png" , "test/upload/2023_02_14_064749_sample_images_04.png");
-    // $obj = array("upload/2023_02_14_064749_sample_images_03.png" , "upload/2023_02_14_064749_sample_images_04.png");
-    // $fileClass->zipUpload($obj); 
-    // zipUpload(오브젝트 OR 배열 (파일이름) , 필요시 경로);
+    // $obj = array("2023_02_14_064749_sample_images_03.png" , "2023_02_14_064749_sample_images_04.png");
+    // $fileClass->zipDownload($obj); 
+    // zipDownload(오브젝트 OR 배열 (파일이름) , 필요시 경로);
 
-    //압축해서 기존파일 업로드 하기
+    //압축해서 파일 업로드 하기
 
     // 압축해서 업로드 다중 (multiful)
     // $file = $_FILES['multifile'];
@@ -174,17 +174,20 @@ spl_autoload_register("classAutoload");
         var formData = new FormData;
 
         var test = [
-        "upload/2023_02_14_064749_sample_images_03.png",
-        "upload/2023_02_14_064749_sample_images_04.png",
-        "upload/2023_02_14_064749_sample_images_05.png",
+        "2023_02_14_064749_sample_images_03.png",
+        "2023_02_14_064749_sample_images_04.png",
+        "2023_02_14_064749_sample_images_05.png",
         ];
+
+        var mulitfulFileList = document.querySelector("#mutifile");
 
         uploadFileList.forEach((data , index) => {
             formData.append("fileList" + index ,  data);
         }); 
         formData.append("fileCount" , uploadFileList.length);
         formData.append("testFileList" , test);
-
+        formData.append("multiFileList" , mulitfulFileList);
+        
         const requset = new XMLHttpRequest;
 
         requset.open("POST" , "./UploadTest2.php");

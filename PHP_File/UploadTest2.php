@@ -20,19 +20,35 @@ function classAutoload($className = ""){
 spl_autoload_register("classAutoload");
 
 //다중 단일 업로드
-    $fileClass = new File;
-    $fileCount = $_POST["fileCount"];
+    // $fileClass = new File;
+    // $fileCount = $_POST["fileCount"];
 
     // for($i = 0;  $i < $fileCount; $i++){
     //     if(!empty($_FILES["fileList" . $i])){
-    //         $fileClass->singleFileUplaod($_FILES["fileList" . $i] , "upload/" , "image");
+    //         $test = $fileClass->singleFileUplaod($_FILES["fileList" . $i] , "upload/" , "image");
     //     }; 
     // }
+
 //다중 단일 업로드
 
-    $testFileList = $_POST["testFileList"];
-    $testFileList = explode("," , $testFileList);
-    
-    $test = $fileClass->zipUpload($testFileList);
+//압축 파일 이름으로 업로드
+    // $testFileList = $_POST["testFileList"];
+    // $testFileList = explode("," , $testFileList);
+
+    // $test = $fileClass->zipUpload($testFileList);
+//압축 파일 이름으로 업로드
+
+//압축 다중 업로드
+    // $fileListArray = array();
+    // for($i = 0; $i < $fileCount; $i++){
+    //     if(!empty($_FILES["fileList" . $i])){
+    //         array_push($fileListArray , $_FILES['fileList' . $i]);
+    //     }
+    // }
+
+    // $test = $fileClass->zipUpload($fileListArray , "upload/");
+    // return print_r(json_encode($test));
+
+//압추 다중 업로드
 
 ?>
