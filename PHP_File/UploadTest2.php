@@ -13,7 +13,7 @@ function classAutoload($className = ""){
     global $modulePath;
     if ($className != "") {
         require_once $modulePath . "/Module" . "/" . $className . ".php";
-        //패스 정보 변경
+        //경로 정보 변경
     }
 }
 
