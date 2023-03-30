@@ -36,7 +36,7 @@ class MySQL{ // 사용시 클래스 (AUtO) 로드 필요
                     $this->connection = $conn;
                 } else {
                     $type = "CONNECTION ERROR";
-                    self::console_log($type , mysqli_connect_error());
+                    self::error_log($type , mysqli_connect_error());
                 }
             } else {
                 $conn = $_SESSION[self::MYSQL];
@@ -45,7 +45,7 @@ class MySQL{ // 사용시 클래스 (AUtO) 로드 필요
             $this->connection = $conn;
         } catch (mysqli_sql_exception $error) {
             $type = "CONNECTION ERROR";
-            self::console_log($type, $error->getMessage());
+            self::error_log($type, $error->getMessage());
             return false;
         }
     }
@@ -139,7 +139,7 @@ class MySQL{ // 사용시 클래스 (AUtO) 로드 필요
         }
     }
 
-    function console_log($type, $error_message = ""){    
+    function error_log($type, $error_message = ""){    
 
         // NO DELETE CHANGED : 삭제된 데이터가 없을 경우 
         // NO UPDATE CHANGED : 변경된 데이터가 없을 경우
@@ -220,13 +220,13 @@ class MySQL{ // 사용시 클래스 (AUtO) 로드 필요
 
         if(strlen($bind) != $questionCount){//바인드와 데이터가 맞지 않을경우 
             $type = "NONE COUNT";
-            self::console_log($type);
+            self::error_log($type);
             return false;
         }
 
         if($obj->table == "" || $obj->table == null){//테이블명을 뺴먹었을 경우 
             $type = "NONE TABLE";
-            self::console_log($type);
+            self::error_log($type);
             return false;
         }
 
@@ -255,7 +255,7 @@ class MySQL{ // 사용시 클래스 (AUtO) 로드 필요
    
         } catch (mysqli_sql_exception $error) {
             $type = "SQL ERROR";
-            self::console_log($type, $error->getMessage());
+            self::error_log($type, $error->getMessage());
             $statement->close();
             return false;
         }
@@ -270,7 +270,7 @@ class MySQL{ // 사용시 클래스 (AUtO) 로드 필요
 
         if(strlen($bind) != $questionCount){ //바인드와 데이터수가 맞지 않을 때 
             $type = "NONE COUNT";
-            self::console_log($type);
+            self::error_log($type);
             return false;
         }
 
@@ -301,30 +301,17 @@ class MySQL{ // 사용시 클래스 (AUtO) 로드 필요
 
         } catch (mysqli_sql_exception $error) {
             $type = "SQL ERROR";
-            self::console_log($type , $error->getMessage());
+            self::error_log($type , $error->getMessage());
             $statement->close();
             return false;
         }
         
         $objList = array();//객체 리스트를 담을 배열 생성
         $listCount = self::countCheck($list); //count를 구하는지 체크
-
-        // $listCountCheck = 0;
-
-        // foreach($list as $key => $item){ //count수가 0인값 일 경우 표출 X 
-        //     if(count($item) == 1){
-        //         $key = key($item);
-        //         $listCountCheck = $item[$key];
-        //     }else{
-        //         $listCountCheck = 1;
-        //     }
-        // }
-
-        // if($listCountCheck == 0 && $listCount->count == null){
             
         if(count($list) == 0 && $listCount->count == null){ //0개여도 return
             $type = "NO SELECT DATA";
-            self::console_log($type);
+            self::error_log($type);
             return false;
         }
 
@@ -374,7 +361,7 @@ class MySQL{ // 사용시 클래스 (AUtO) 로드 필요
 
         if(strlen($bind) != $questionCount){ //바인드수와 데이터수가 동일하지 않을 경우 
             $type = "NONE COUNT";
-            self::console_log($type);
+            self::error_log($type);
             return false;
         }
 
@@ -392,7 +379,7 @@ class MySQL{ // 사용시 클래스 (AUtO) 로드 필요
 
                 if($statement->affected_rows == 0 ){ //변경된 데이터가 없을 때 
                     $type = "NO UPDATE CHANGED";
-                    self::console_log($type);
+                    self::error_log($type);
                     return true;
                 };
 
@@ -403,7 +390,7 @@ class MySQL{ // 사용시 클래스 (AUtO) 로드 필요
             
         } catch (mysqli_sql_exception $error) {
             $type = "SQL ERROR";
-            self::console_log($type, $error->getMessage());
+            self::error_log($type, $error->getMessage());
             $statement->close();
             return false;
         }
@@ -449,7 +436,7 @@ class MySQL{ // 사용시 클래스 (AUtO) 로드 필요
 
             if($obj->table == "" || $obj->table == null){ //테이블명을 빼먹을 경우 console에 출력 
                 $type = "NONE TABLE";
-                self::console_log($type);
+                self::error_log($type);
                 return false;
             }
 
@@ -457,7 +444,7 @@ class MySQL{ // 사용시 클래스 (AUtO) 로드 필요
         
         if(strlen($bind) != $questionCount){ //바인드와 데이터수가 맞지 않을경우 consoled에 출력 
             $type = "NONE COUNT";
-            self::console_log($type);
+            self::error_log($type);
             return false;
         }
 
@@ -478,14 +465,14 @@ class MySQL{ // 사용시 클래스 (AUtO) 로드 필요
                     return true;
                 }else{
                     $type = "NO DELETE CHANGED"; //정상정으로 실행되었지만 삭제된게 없을 경우 
-                    self::console_log($type);
+                    self::error_log($type);
                     return true;
                 }
             } 
             
         } catch (mysqli_sql_exception $error){//SQL exception 발동
             $type = "SQL ERROR";
-            self::console_log($type, $error->getMessage());
+            self::error_log($type, $error->getMessage());
             $this->connection->close();
             return false;
         }
