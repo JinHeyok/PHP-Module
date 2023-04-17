@@ -139,6 +139,10 @@ class MySQL{ // 사용시 클래스 (AUtO) 로드 필요
         }
     }
 
+    function data_log($result){
+        print(sprintf("<pre style='background-color : 006600; color : white; font-family : fangsong; font-weight : bold; padding : 0.2rem;'>%s</pre>" , print_r($result , true)));
+    }
+
     function error_log($type, $error_message = ""){    
 
         // NO DELETE CHANGED : 삭제된 데이터가 없을 경우 
@@ -146,6 +150,7 @@ class MySQL{ // 사용시 클래스 (AUtO) 로드 필요
         // NO SELECT DATA : 검색된 데이터가 없을 경우 
         // NONE COUNT : 바인드수와 데이터수가 동일하지 않을 경우
         // NONE TABLE : 테이블명이 존재하지 않을 경우 
+        // NONE INSERT DATA : 정상실행이지만 추가된 데이터가 없을 경우
         
         // SQL ERROR : SQL 에러일 경우
         // CONNECTION ERROR : 연결정보 오류일 경유
@@ -175,6 +180,10 @@ class MySQL{ // 사용시 클래스 (AUtO) 로드 필요
                 $text = "테이블명이 존재하지 않습니다.";
                 $errorType = "NONE TABLE";
                 break;
+            case "NONE INSERT DATA":
+                $text = $error_message;
+                $errorType = "NONE INSERT DATA";
+                break;
             case "SQL ERROR":
                 $text = $error_message;
                 $errorType = "SQL ERROR";
@@ -188,8 +197,9 @@ class MySQL{ // 사용시 클래스 (AUtO) 로드 필요
                 $errorType  = "NONE";
                 break;
         } 
-        $script = '<script>console.log("' . $errorType  . ' : '  . $text . '");</script>';
-        print_r($script);
+        // $script = '<script>console.log("' . $errorType  . ' : '  . $text . '");</script>';
+        // print_r($script);
+        print(sprintf("<pre style='background-color : 330000; color : white; font-family : fangsong; font-weight : bold; padding : 0.2rem; white-space : pre-wrap;'>%s</pre>" , print_r($text , true)));
     }
 
     function debug_log($message){
@@ -197,7 +207,6 @@ class MySQL{ // 사용시 클래스 (AUtO) 로드 필요
         $script = "<script>console.log('Debugging : " . json_encode($message) . "');</script>";
         print_r($script);
     }
-
 
     function insert($obj){
 
@@ -246,7 +255,7 @@ class MySQL{ // 사용시 클래스 (AUtO) 로드 필요
                     $statement->close(); //쿼리해제
                     return true;
                 }else{
-                    print_r("<script>console.log('실행하였지만 추가된 Data가 없습니다.');</script>");
+                    self::error_log("NONE INSERT DATA" , "실행하였지만 추가된 Data가 없습니다.");
                     $statement->close();
                     return false;
                 }
@@ -308,6 +317,19 @@ class MySQL{ // 사용시 클래스 (AUtO) 로드 필요
         
         $objList = array();//객체 리스트를 담을 배열 생성
         $listCount = self::countCheck($list); //count를 구하는지 체크
+
+        // $listCountCheck = 0;
+
+        // foreach($list as $key => $item){ //count수가 0인값 일 경우 표출 X 
+        //     if(count($item) == 1){
+        //         $key = key($item);
+        //         $listCountCheck = $item[$key];
+        //     }else{
+        //         $listCountCheck = 1;
+        //     }
+        // }
+
+        // if($listCountCheck == 0 && $listCount->count == null){
             
         if(count($list) == 0 && $listCount->count == null){ //0개여도 return
             $type = "NO SELECT DATA";
