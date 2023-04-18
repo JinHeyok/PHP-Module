@@ -39,16 +39,16 @@ foreach($selectList as $key => $obj){
 
 //인서트 객체 타입
 
-//$obj->컬림명 = 데이터
-//$obj->컬럼명 = 데이터
-//$obj->talbe = table명 꼭 테이블명 삽입 
+// $obj->컬림명 = 데이터
+// $obj->컬럼명 = 데이터
+// $obj->talbe = table명 꼭 테이블명 삽입 
 
-// $insertObj = new stdClass; 
+$insertObj = new stdClass; 
 
-// $insertObj->su_id = "test4"; 
-// $insertObj->su_pw = "test4";
-// $insertObj->table = "store_user";
-// $insertStatus = $db->insert($insertObj);
+$insertObj->su_id = "test4"; 
+$insertObj->su_pw = "test4";
+$insertObj->table = "store_user";
+$insertStatus = $db->insert($insertObj);
 
 // print_r($insertStatus);
 

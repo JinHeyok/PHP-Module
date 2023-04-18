@@ -181,7 +181,7 @@ class MySQL{ // 사용시 클래스 (AUtO) 로드 필요
                 $errorType = "NONE TABLE";
                 break;
             case "NONE INSERT DATA":
-                $text = $error_message;
+                $text = "정상적으로 실행되었지만 추가된 데이터가 없습니다.";
                 $errorType = "NONE INSERT DATA";
                 break;
             case "SQL ERROR":
@@ -255,7 +255,7 @@ class MySQL{ // 사용시 클래스 (AUtO) 로드 필요
                     $statement->close(); //쿼리해제
                     return true;
                 }else{
-                    self::error_log("NONE INSERT DATA" , "실행하였지만 추가된 Data가 없습니다.");
+                    self::error_log("NONE INSERT DATA");
                     $statement->close();
                     return false;
                 }
@@ -318,19 +318,6 @@ class MySQL{ // 사용시 클래스 (AUtO) 로드 필요
         $objList = array();//객체 리스트를 담을 배열 생성
         $listCount = self::countCheck($list); //count를 구하는지 체크
 
-        // $listCountCheck = 0;
-
-        // foreach($list as $key => $item){ //count수가 0인값 일 경우 표출 X 
-        //     if(count($item) == 1){
-        //         $key = key($item);
-        //         $listCountCheck = $item[$key];
-        //     }else{
-        //         $listCountCheck = 1;
-        //     }
-        // }
-
-        // if($listCountCheck == 0 && $listCount->count == null){
-            
         if(count($list) == 0 && $listCount->count == null){ //0개여도 return
             $type = "NO SELECT DATA";
             self::error_log($type);
