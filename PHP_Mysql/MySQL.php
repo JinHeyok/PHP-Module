@@ -145,16 +145,17 @@ class MySQL{ // 사용시 클래스 (AUtO) 로드 필요
 
     function error_log($type, $error_message = ""){    
 
-        // NO DELETE CHANGED : 삭제된 데이터가 없을 경우 
-        // NO UPDATE CHANGED : 변경된 데이터가 없을 경우
-        // NO SELECT DATA : 검색된 데이터가 없을 경우 
-        // NONE COUNT : 바인드수와 데이터수가 동일하지 않을 경우
-        // NONE TABLE : 테이블명이 존재하지 않을 경우 
-        // NONE INSERT DATA : 정상실행이지만 추가된 데이터가 없을 경우
-        
-        // SQL ERROR : SQL 에러일 경우
-        // CONNECTION ERROR : 연결정보 오류일 경유
-        // NONE : 설정된 에러항목이 없음
+        /** 
+        * @param type NO DELETE CHANGED : 삭제된 데이터가 없을 경우 
+        * @param type NO UPDATE CHANGED : 변경된 데이터가 없을 경우
+        * @param type NO SELECT DATA : 검색된 데이터가 없을 경우 
+        * @param type NONE COUNT : 바인드수와 데이터수가 동일하지 않을 경우
+        * @param type NONE TABLE : 테이블명이 존재하지 않을 경우 
+        * @param type NONE INSERT DATA : 정상실행이지만 추가된 데이터가 없을 경우
+        * @param type SQL ERROR : SQL 에러일 경우
+        * @param type CONNECTION ERROR : 연결정보 오류일 경유
+        * @param type NONE : 설정된 에러항목이 없음
+         */
 
         $text = "";
         $errorType = "";
@@ -199,7 +200,7 @@ class MySQL{ // 사용시 클래스 (AUtO) 로드 필요
         } 
         // $script = '<script>console.log("' . $errorType  . ' : '  . $text . '");</script>';
         // print_r($script);
-        print(sprintf("<pre style='background-color : 330000; color : white; font-family : fangsong; font-weight : bold; padding : 0.2rem; white-space : pre-wrap;'>%s</pre>" , print_r($text , true)));
+        print(sprintf("<pre style='background-color : 330000; color : white; font-family : fangsong; font-weight : bold; padding : 0.2rem; white-space : pre-wrap;'>%s</pre>" , print_r($errorType . " : " .  $text , true)));
     }
 
     function debug_log($message){

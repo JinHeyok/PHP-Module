@@ -6,6 +6,7 @@ class File{
         "IMAGE" => "/jpg|jpeg|gif|svg|png|bmp/", //이미지만(eng)
         "이미지" => "/jpg|jpeg|gif|svg|png|bmp/", //이미지만(kor)
         "PDF" => "/pdf/",  //PDF파일만
+        "pdf" => "/pdf/",  //PDF파일만
     );
     const FILTER = array("" , null , "undefined"); //빈값 체크 
 
@@ -27,21 +28,24 @@ class File{
         return $extension;
     }
 
+    function nowDate(){
+        $date = new DateTime("now");
+        $date = $date->format("Y_m_d_His");// Y-m-d H:i:s 년월일 시분초
+        return $date;
+    }
+
     function error_log($error_type  , $fileName = "" , $filePath = ""){
 
         $text = "";
-
-        // self::debug_log("fileName : " . $fileName);
-        // self::debug_log("filePath : " . $filePath);
-
-        //UPLOAD ERROR  : 파일이 없거나 확장명이 맞지 않을 때 
-        //ZIP CREATE ERROR : 알집파일을 만드는 오류가 발생할 때 
-        //NOT FILE : 파일이 없을 경우 
+        /**
+        * @param Error_type  ZIP CREATE ERROR : 알집파일을 만드는 오류가 발생할 때 
+        * @param Error_type  FILE TYPE ERROR : 파일 파라미터 값이 형식에 맞지 않을 때 
+        * @param Error_type  FILE EXTENSTION ERROR : 파일이 없거나 파일 형식이 맞지 않을 때
+        * @param Error_type  MULTIFUL FILE TYPE NOT ARRAY : 멀티플 업로드할 때 배열로 넘어오지 않을 때 
+        * @param Error_type  NOT FILE : 파일이 없을 경우 
+         */
 
         switch ($error_type) {
-            case "UPLOAD ERROR":
-                $text = "UPLOAD ERROR : 파일이 없거나 파일 형식이 맞지 않습니다.";
-                break;
             case "FILE EXTENSTION ERROR":
                 $text = "FILE EXTENSTION ERROR : 파일이 없거나 파일 형식이 맞지 않습니다." . 
                 $text .= "\n 업로드 할 확장자 : " . $fileName;
@@ -55,16 +59,20 @@ class File{
             case "ZIP CREATE ERROR":
                 $text = "ZUP CREATE ERROR : 알집파일을 만드는데 오류가 발생했습니다.";
                 break;
+            case "MULTIFUL FILE TYPE NOT ARRAY":
+                $text = "MULTIFUL FILE TYPE NOT ARRAY : 파일 파라미터가 배열이 아닙니다.";
+                $text .= "\n 파일타입 : " . $fileName;
+                break;
             case "NOT FILE":
                 $text = "NOT FILE : 파일이 없습니다.";
                 $text .= "\n 파일 : " . $fileName;
                 $text .= "\n 파일타입 : " . gettype($fileName);
                 break;
             default:
-                # code...
+                $text = "설정된 에러 항목이 없습니다.";
                 break;
         }
-        print_r("<script>console.log('" . json_encode($text) . "')</script>");
+        print(sprintf("<pre style='background-color : 330000; color : white; font-family : fangsong; font-weight : bold; padding : 0.2rem; white-space : pre-wrap;'>%s</pre>" , print_r($text , true)));
     }
     
     function singleFileUplaod($file , $path , $type , $uuid = false){//단일 파일
@@ -77,8 +85,7 @@ class File{
             // $fileType = $file["type"]; //파일 타입 
             $fileTmpName = $file["tmp_name"];
             
-            $date = new DateTime("now");
-            $date = $date->format("Y_m_d_His");// Y-m-d H:i:s 년월일 시분초
+            $date = self::nowDate();
             
             if(!in_array($fileTmpName , self::FILTER) && preg_match(self::EXTENSION[strtoupper($type)], $extension)){
                 //파일이 존재하고, 타입에 맞게 확장자가 맞을 경우 업로드 
@@ -117,8 +124,7 @@ class File{
                 $fileName = $uuid == true ? self::gen_uuid_v4() . "." . $extension : $file['name'][$key];// 파일이름 기본이름할지 UUID 쓸지 
                 $fileTmpName = $data;
 
-                $date = new DateTime("now");//날짜 생성 
-                $date = $date->format("Y_m_d_His");
+                $date = self::nowDate();
 
                 if(!in_array($fileTmpName , self::FILTER) && preg_match(self::EXTENSION[strtoupper($type)] , $extension)){//해당 값 아니고, 넘어온 파일타입이 맞을 때 실행
                     
@@ -137,6 +143,9 @@ class File{
             }
 
             return true;
+        }else{
+            self::error_log("MULTIFUL FILE TYPE NOT ARRAY" , gettype($file));
+            return false;
         }
     }
 
@@ -161,8 +170,7 @@ class File{
             return false;
         }
         
-        $date = new DateTime("now");
-        $date = $date->format('Y_m_d_His');
+        $date = self::nowDate(); 
 
         foreach($files as $key => $data){
 
@@ -241,8 +249,7 @@ class File{
         }
 
         
-        $date = new DateTime("now");
-        $date = $date->format('Y_m_d_His');
+        $date = self::nowDate();
         
         foreach($files as $key => $data){
             

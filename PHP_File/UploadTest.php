@@ -59,14 +59,14 @@ spl_autoload_register("classAutoload");
     //move_uploaded_file(tmp_name, 경로를포함한 파일이름지정)
     //임시 저장된 파일을 해당경로 이름으로 업로드한다.
 
-    //단일 파일 업로드 
+    // 단일 파일 업로드 
     // $fileClass->singleFileUplaod($file , $uploaddir ,  "image" , false); 
     // singleFileUpload(파일객체 , 경로  , 업로드할 파일 타입(check타입) ,  uuid 사용여부(default = false));
 
     //다중 파일 업로드 (multiful type)
     // $fileClass->multifulFileUpload($file, $uploaddir , "pdf", false );
     // multifulUpload(배열(key이름마다 value는 배열로 이루어져있음) , 경로 ,  업로드할 파일 타입(check타입) , uuid 사용여부(defalt = false))
-    
+
     //압축해서 파일 다운로드
     // $obj = new stdClass;
     // $obj->path = "";
@@ -85,7 +85,6 @@ spl_autoload_register("classAutoload");
     // $fileClass->allDownload($fileArray);
     // allDownload(배열(파일이름) , 경로);
 
-    //압축파일 업로드 
 
     // //압축해서 기존파일 다운로드 하기
     // $obj = new stdClass;
