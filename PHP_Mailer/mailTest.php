@@ -27,5 +27,5 @@ $content =
 EOT;
 
 
-$mailStatus = $mail->mail("테스트" , "kpjh@ninefive.com" , "테스트 메일 입니다." , $content );
+$mailStatus = $mail->mail("테스트" , "test@nave.com" , "테스트 메일 입니다." , $content );
 //$mail->mail(메일 보내는 이, 메일을 받을 이메일, 메일 제목, 메일 내용);
