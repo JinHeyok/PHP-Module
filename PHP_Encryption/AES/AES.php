@@ -10,17 +10,20 @@
 class AES{
 
     const KEY = "test";
+    const iv = "1234567890123456"; // 16자리
     
     function AESEncode($result){
+
+        $ivKey = substr(hash("sha256" , self::iv) , 0, 16);
         
         if(gettype($result) === "array"){ //배열이 넘어왔을 경우
             
             $encodeArray = array();
             
             foreach($result as $key => $item){
-                $baseEncode = base64_encode($item);
-                $aesEncode = openssl_encrypt($baseEncode , "aes-256-cbc" , self::KEY , true ,str_repeat(chr(0) , 16));
-                array_push($encodeArray , $aesEncode);
+                $aesEncode = openssl_encrypt($item , "aes-256-cbc" , self::KEY , true , $ivKey);
+                $baseEncode = base64_encode($aesEncode);
+                array_push($encodeArray , $baseEncode);
             }
             
             return $encodeArray;
@@ -32,13 +35,13 @@ class AES{
             
             foreach($keys as $index => $item){
                 //key
-                $baseEncodeKey = base64_encode($item);//키에대한 밸류값들 암호화
-                $aesEncodeKey= openssl_encrypt($baseEncodeKey , "aes-256-cbc" , self::KEY , true , str_repeat(chr(0) , 16));
+                $aesEncodeKey= openssl_encrypt($item , "aes-256-cbc" , self::KEY , true ,  $ivKey);
+                $baseEncodeKey = base64_encode($aesEncodeKey);//키에대한 밸류값들 암호화
 
                 //value
-                $baseEncodeValue = base64_encode($result->$item);//키에대한 밸류값들 암호화
-                $aesEncodeValue= openssl_encrypt($baseEncodeValue , "aes-256-cbc" , self::KEY , true , str_repeat(chr(0) , 16));
-                $obj->$aesEncodeKey = $aesEncodeValue;
+                $aesEncodeValue= openssl_encrypt($result->$item , "aes-256-cbc" , self::KEY , true ,  $ivKey);
+                $baseEncodeValue = base64_encode($aesEncodeValue);//키에대한 밸류값들 암호화
+                $obj->$baseEncodeKey = $baseEncodeValue;
 
             }
 
@@ -46,11 +49,11 @@ class AES{
 
         }else{
             
-            $baseEncode = base64_encode($result);//한글 인코딩 문제로 먼저 base64로 인코딩 해준다
-            $aesEncode = openssl_encrypt($baseEncode , "aes-256-cbc" , self::KEY , true , str_repeat(chr(0) , 16));
+            $aesEncode = openssl_encrypt($result , "aes-256-cbc" , self::KEY , true ,  $ivKey);
+            $baseEncode = base64_encode($aesEncode);//한글 인코딩 문제로 먼저 base64로 인코딩 해준다
             //base64를 거쳐와서 해당 언어를 AES로 다시 암호화 시켜준다.
 
-            return $aesEncode;
+            return $baseEncode;
         }
          
 
@@ -58,6 +61,7 @@ class AES{
 
     function AESDecode($result){
 
+        $ivKey = substr(hash("sha256" , self::iv) , 0, 16);
                
         if(gettype($result) === "array"){ //배열이 넘어왔을 경우
             
@@ -65,9 +69,9 @@ class AES{
             
             foreach($result as $key => $item){
 
-                $aesDecode = openssl_decrypt($item , "aes-256-cbc" , self::KEY , true  , str_repeat(chr(0) , 16));
-                $baseDeocde = base64_decode($aesDecode);
-                array_push($encodeArray , $baseDeocde);
+                $baseDeocde = base64_decode($item);
+                $aesDecode = openssl_decrypt($baseDeocde , "aes-256-cbc" , self::KEY , true  ,  $ivKey);
+                array_push($encodeArray , $aesDecode);
             }
             
             return $encodeArray;
@@ -80,25 +84,25 @@ class AES{
             foreach($keys as $index => $item){
 
                 //key
-                $aesDecodeKey = openssl_decrypt($item , "aes-256-cbc" , self::KEY , true , str_repeat(chr(0) , 16));
-                $baseDeocdeKey = base64_decode($aesDecodeKey);//키에대한 밸류값들 암호화
+                $baseDeocdeKey = base64_decode($item);//키에대한 밸류값들 암호화
+                $aesDecodeKey = openssl_decrypt($baseDeocdeKey , "aes-256-cbc" , self::KEY , true ,  $ivKey);
 
                 //value 
-                $aesDecodeValue = openssl_decrypt($result->$item , "aes-256-cbc" , self::KEY , true , str_repeat(chr(0) , 16));
-                $baseDeocdeValue = base64_decode($aesDecodeValue);//키에대한 밸류값들 암호화
-                $obj->$baseDeocdeKey = $baseDeocdeValue;
+                $baseDeocdeValue = base64_decode($result->$item);//키에대한 밸류값들 암호화
+                $aesDecodeValue = openssl_decrypt($baseDeocdeValue , "aes-256-cbc" , self::KEY , true ,  $ivKey);
+                $obj->$aesDecodeKey = $aesDecodeValue;
                 
             }
             return $obj;
 
         }else{
 
-            $aesDecode = openssl_decrypt($result , "aes-256-cbc" , self::KEY , true  , str_repeat(chr(0) , 16));
-            //AES로 복호화 
-            $baseDeocde = base64_decode($aesDecode);
+            $baseDeocde = base64_decode($result);
             //처음에 base64Encode 했던거를 다시 복호화 시켜준다.
+            $aesDecode = openssl_decrypt($baseDeocde , "aes-256-cbc" , self::KEY , true  ,  $ivKey);
+            //AES로 복호화 
             
-            return $baseDeocde;
+            return $aesDecode;
         }
             
     }

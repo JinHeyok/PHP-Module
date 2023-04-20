@@ -23,19 +23,45 @@ spl_autoload_register("classAutoload");
 //dk암호화 
 $aesClass = new AES;
 
+$text = "test";
+$stringEncode  = $aesClass->AESEncode($text);
+$stringDecode = $aesClass->AESDecode($stringEncode);
+
+echo "String" . "<br/>";
+echo "암호화 : ";
+print_r($stringEncode);
+
+echo "<br/>";
+
+echo "복호화 : ";
+print_r($stringDecode);
+
+echo "<br/>";
+
 $array = array("test", "test2"); //배열
+
+$arrayEncode = $aesClass->AESEncode($array);
+$arrayDecode = $aesClass->AESDecode($arrayEncode);
+
+echo "Array " . "<br/>";
+echo "암호화 : ";
+print_r($arrayEncode);
+echo "<br/>";
+echo "복호화 : ";
+print_r($arrayDecode);
+
+echo "<br/>";
+
 $obj = new stdClass; //객체 key,value 둘다 암호화
-$name = "test"; //문장 
 
 $obj->test = "test1";
 $obj->test2 = "test2";
 $obj->test3 = "test3";
 
-$text = $obj;
+$objEncode = $aesClass->AESEncode($obj);// 암호화 
+$objDecode = $aesClass->AESDecode($objEncode); // 복호화
 
-$encode = $aesClass->AESEncode($text);// 암호화 
-$decode = $aesClass->AESDecode($encode); // 복호화
-
+echo "Class" . "<br/>";
 echo "암호화 : ";
 print_r($encode);
 
