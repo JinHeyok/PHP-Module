@@ -5,7 +5,7 @@
     - prepare사용
     - Bind 될 Data의 갯수에 따라 '?' 와 DataType 자동 삽입
     - Bind 될 Data가 없어도 정상 실행
-
+    - transaction 구현 class에서 가져와 사용 , commit , rollback 동일
 --- 
 ## - SELECT
     - 예시문
@@ -83,6 +83,9 @@
 |CONNECTION ERROR|DB 연결 오류시 연결 오류 출력|mysqli_sql_exception Error 출력|
 |SQL ERROR|실제 SQL Error Message 출력|mysqli_sql_exception Error 출력|
 |TIME_ZONE ERROR|시간 설정 오류일 경우 (데이터가 없을 경우)|mysqli_sql_exception Error 출력|
+|TRANSACTION ERROR|트랜잭션 실행 오류|mysqli_sql_exception Error 출력|
+|COMMIT ERROR|커밋 실행 오류|mysqli_sql_exception Error 출력|
+|ROLLBACK ERROR|롤백 실행 오류|mysqli_sql_exception Error 출력|
 |NONE COUNT|바인드 수와 데이터 수가 동일하지 않을 경우|"바인드 수와 데이터 수가 동일하지 않습니다."|
 |NONE TABLE|테이블 명이 존재하지 않을 경우|"테이블명이 존재하지 않습니다."|
 |NONE DATA TYPE|설정된 데이터 타입이 아닐 경우|"설정된 데이터 타입이 아닙니다."|

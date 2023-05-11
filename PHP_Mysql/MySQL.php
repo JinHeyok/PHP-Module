@@ -18,9 +18,11 @@ class MySQL{ // 사용시 클래스 (AUtO) 로드 필요
     
     private static $timezone = "Asia/Seoul"; //시간설정 
     private static $charset = "utf8mb4"; //인코딩 설정 (이모지로 인해 4byte)
-
-    private $connection = null;
+    
+    private $connection = null; //DB 객체 담기
     private $errorLogStatus = true; //에러로그 사용 여부 true : 사용 , false : 미사용
+    private $transaction = false; //트랜잭션 사용 시 true 전환 연결 닫지 않기
+    
 
     function __construct(){//기본생성자 생성
         session_start();
@@ -167,6 +169,9 @@ class MySQL{ // 사용시 클래스 (AUtO) 로드 필요
         * @param error  CONNECTION ERROR : 연결정보 오류일 경유
         * @param error  TIME_ZONE ERROR : 시간 설정 오류일 경우 (없을 경우)
         * @param error  NONE DATA TYPE : 설정된 데이터 타입이 아닙니다.
+        * @param error  TRANSACTION ERROR : 트랜잭션 실행 오류
+        * @param error  COMMIT ERROR : 커밋 에러
+        * @param error  ROLLBACK ERROR : 롤백 에러
         * @param error  NONE : 설정된 에러항목이 없음
         */
 
@@ -199,6 +204,18 @@ class MySQL{ // 사용시 클래스 (AUtO) 로드 필요
                 case "NONE DATA TYPE":
                     $errorType = "NONE DATA TYPE";
                     $text = $errorType . " : " . "설정된 데이터 타입이 아닙니다.";
+                    break;
+                case "COMMIT ERROR":
+                    $errorType = "COMMIT ERROR";
+                    $text = $errorType . " : " . $error_message;
+                    break;
+                case "ROLLBACK ERROR":
+                    $errorType = "ROLLBACK ERROR";
+                    $text = $errorType . " : " . $error_message;
+                    break;
+                case "TRANSACTION ERROR":
+                    $errorType = "TRANSACTION ERROR";
+                    $text = $errorType . " : " . $error_message;
                     break;
                 case "NONE INSERT DATA":
                     $errorType = "NONE INSERT DATA";
@@ -233,6 +250,44 @@ class MySQL{ // 사용시 클래스 (AUtO) 로드 필요
         print_r($script);
     }
 
+    //트랜잭션
+    function transaction(){
+        $query = "START TRANSACTION;";
+        $this->transaction = true;
+        try{
+            mysqli_query($this->connection , $query);
+        }catch(mysqli_sql_exception $error){
+            $type = "TRANSACTION ERROR";
+            self::error_log($type , $error->getMessage());
+            return false;
+        }
+    }
+    
+    function commit(){
+        $query = "COMMIT;";
+        $this->transaction = false;
+        try{
+            mysqli_query($this->connection , $query);
+        }catch(mysqli_sql_exception $error){
+            $type = "COMMIT ERROR";
+            self::error_log($type , $error->getMessage());
+            return false;
+        }
+    }
+    
+    function rollback(){
+        $query = "ROLLBACK;";
+        $this->transaction = false;
+        try{
+            mysqli_query($this->connection , $query);
+        }catch(mysqli_sql_exception $error){
+            $type = "ROLLBACK ERROR";
+            self::error_log($type , $error->getMessage());
+            return false;
+        }
+    }
+    //트랜잭션
+    
     function insert($obj , $data = array()){
 
         /**
@@ -322,7 +377,9 @@ class MySQL{ // 사용시 클래스 (AUtO) 로드 필요
         } catch (mysqli_sql_exception $error) {
             $type = "SQL ERROR";
             self::error_log($type, $error->getMessage());
-            $this->connection->close();
+            if($this->transaction != true){
+                $this->connection->close();
+            }
             return false;
         }
 
@@ -455,7 +512,9 @@ class MySQL{ // 사용시 클래스 (AUtO) 로드 필요
         } catch (mysqli_sql_exception $error) {
             $type = "SQL ERROR";
             self::error_log($type, $error->getMessage());
-            $this->connection->close();
+            if($this->transaction != true){
+                $this->connection->close();
+            }
             return false;
         }
 
@@ -537,7 +596,9 @@ class MySQL{ // 사용시 클래스 (AUtO) 로드 필요
         } catch (mysqli_sql_exception $error){//SQL exception 발동
             $type = "SQL ERROR";
             self::error_log($type, $error->getMessage());
-            $this->connection->close();
+            if($this->transaction != true){
+                $this->connection->close();
+            }
             return false;
         }
     }

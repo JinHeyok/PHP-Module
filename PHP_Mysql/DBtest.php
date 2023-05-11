@@ -50,12 +50,18 @@ $insertObj->comm = 1000.00;
 $insertObj->hiredate = "1990-02-03";
 $insertObj->deptno = 30;
 
+//transaction
+$db->transaction(); //트랜잭션 시작
+
 //인서트 쿼리형 타입 
 $insertString = "INSERT INTO emp ( empno , ename , mgr , job , sal ,comm , hiredate , deptno) VALUES (? , ? , ? , ? , ? , ? , ? ,? );";
 $insertData = array(8002 , "CHIRS" , 7902 , "CLWEK" , 6000.00  , 1000 , "1990-02-03" , 30);
 
 $insertStatus =  $db->insert($insertObj , $insertData); //객체 
 $insertStatus =  $db->insert($insertString , $insertData); //문장
+
+$db->rollback(); //롤백
+$db->commit(); // 커밋 
 
 print_r($insertStatus);
 
