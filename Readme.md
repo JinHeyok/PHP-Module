@@ -9,6 +9,8 @@
     - ErrorLog 사용 여부 추가 (true/false)
     - time_zone 설정 추가 (Asia/Seoul)
     - charset 설정 추가 (utf8mb4)
+    - INSERT query 추가, bindType double 오류 수정
+    - 연결해제 종료 오류 수정
 
 ### PHP Excel1.8 모둘 (2007)
 - - -

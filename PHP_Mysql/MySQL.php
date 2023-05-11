@@ -77,12 +77,14 @@ class MySQL{ // 사용시 클래스 (AUtO) 로드 필요
         foreach ($type as $item) {
             if (gettype($item) === "string") {
                 $bind .= "s";
-            } else if (gettype($item) === "integer") {
+            } else if (gettype($item) === "integer" || gettype($item) === "double") {
                 $bind .= "i";
             } else {
                 return false;
             }
         }
+
+
         return $bind;
     }
 
@@ -164,6 +166,7 @@ class MySQL{ // 사용시 클래스 (AUtO) 로드 필요
         * @param error  SQL ERROR : SQL 에러일 경우
         * @param error  CONNECTION ERROR : 연결정보 오류일 경유
         * @param error  TIME_ZONE ERROR : 시간 설정 오류일 경우 (없을 경우)
+        * @param error  NONE DATA TYPE : 설정된 데이터 타입이 아닙니다.
         * @param error  NONE : 설정된 에러항목이 없음
         */
 
@@ -192,6 +195,10 @@ class MySQL{ // 사용시 클래스 (AUtO) 로드 필요
                 case "NONE TABLE":
                     $errorType = "NONE TABLE";
                     $text = $errorType . " : " . "테이블명이 존재하지 않습니다.";
+                    break;
+                case "NONE DATA TYPE":
+                    $errorType = "NONE DATA TYPE";
+                    $text = $errorType . " : " . "설정된 데이터 타입이 아닙니다.";
                     break;
                 case "NONE INSERT DATA":
                     $errorType = "NONE INSERT DATA";
@@ -226,34 +233,65 @@ class MySQL{ // 사용시 클래스 (AUtO) 로드 필요
         print_r($script);
     }
 
-    function insert($obj){
+    function insert($obj , $data = array()){
 
-        //$obj->컬림명 = 데이터
-        //$obj->컬럼명 = 데이터
-        //$obj->talbe = table명 꼭 테이블명 삽입 
+        /**
+         * @param object 오브젝트 형식
+         * @param String Query 문자형 형식 
+         */
 
-        $column = array_keys((array)$obj);//키값을 배열로 전환
-        $column = str_replace(",table", "", implode(",", $column));//테이블 기값 제거 
-
-        $value = array_values((array)$obj);//value 값들 배열로전환
-        $value = array_filter(str_replace($obj->table, "",  $value));//테이블 명 제거 동시에 빈값 제거 
-
-        $bind = self::bindType($value);//bind문장 가져오기
-        $parameter = self::getParameter($bind);//?문장 가져오기
-        $questionCount = substr_count($parameter , "?");//?수 가져오기
-
-        $query = "INSERT INTO " . $obj->table . " ( " . $column . ") VALUES (" .  $parameter . ");";
-        //실행될 쿼리 입력
-
-
-        if(strlen($bind) != $questionCount){//바인드와 데이터가 맞지 않을경우 
-            $type = "NONE COUNT";
+        if(gettype($obj) !== "object" && gettype($obj) !== "string"){
+            $type = "NONE DATA TYPE";
             self::error_log($type);
             return false;
         }
 
-        if($obj->table == "" || $obj->table == null){//테이블명을 뺴먹었을 경우 
-            $type = "NONE TABLE";
+        $dataValue = array();
+        $query = "";
+        $bind = "";
+        $parameter = "";
+        $questionCount = 0;
+
+        if(gettype($obj) === "object"){
+
+            if(empty($obj->table)){//테이블명을 뺴먹었을 경우 
+                $type = "NONE TABLE";
+                self::error_log($type);
+                return false;
+            }   
+            
+            $column = array_keys((array)$obj);//키값을 배열로 전환
+            $column = str_replace(",table", "", implode(",", $column));//테이블 기값 제거 
+            
+            $value = array_values((array)$obj);//value 값들 배열로전환
+            $value = array_filter(str_replace($obj->table, "",  $value));//테이블 명 제거 동시에 빈값 제거
+
+            foreach($value as $key => $item){
+                array_push($dataValue , $item);
+            }
+
+            $bind = self::bindType($dataValue);//bind문장 가져오기
+            $parameter = self::getParameter($bind);//?문장 가져오기
+            $questionCount = substr_count($parameter , "?");//?수 가져오기
+            
+            $query = "INSERT INTO " . $obj->table . " ( " . $column . ") VALUES (" .  $parameter . ");";
+            //실행될 쿼리 입력
+
+
+        }else if(gettype($obj) === "string"){
+
+            foreach($data as $key => $item){
+                array_push($dataValue , $item);
+            }
+
+            $bind = self::bindType($dataValue);
+            $questionCount = substr_count($obj , "?");//?수 가져오기
+            $query = $obj;
+            
+        }
+
+        if(strlen($bind) != $questionCount){//바인드와 데이터가 맞지 않을경우 
+            $type = "NONE COUNT";
             self::error_log($type);
             return false;
         }
@@ -264,8 +302,8 @@ class MySQL{ // 사용시 클래스 (AUtO) 로드 필요
 
             if ($statement) {
     
-                if ($bind != "" && sizeof($value) > 0) {
-                    $statement->bind_param($bind, ...$value);//bind 삽입
+                if ($bind != "" && sizeof($dataValue) > 0) {
+                    $statement->bind_param($bind, ...$dataValue);//bind 삽입
                 }
     
                 $statement->execute();//실제 쿼리실행
@@ -284,7 +322,7 @@ class MySQL{ // 사용시 클래스 (AUtO) 로드 필요
         } catch (mysqli_sql_exception $error) {
             $type = "SQL ERROR";
             self::error_log($type, $error->getMessage());
-            $statement->close();
+            $this->connection->close();
             return false;
         }
 
@@ -330,7 +368,7 @@ class MySQL{ // 사용시 클래스 (AUtO) 로드 필요
         } catch (mysqli_sql_exception $error) {
             $type = "SQL ERROR";
             self::error_log($type , $error->getMessage());
-            $statement->close();
+            $this->connection->close();
             return false;
         }
         
@@ -417,7 +455,7 @@ class MySQL{ // 사용시 클래스 (AUtO) 로드 필요
         } catch (mysqli_sql_exception $error) {
             $type = "SQL ERROR";
             self::error_log($type, $error->getMessage());
-            $statement->close();
+            $this->connection->close();
             return false;
         }
 
