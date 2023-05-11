@@ -22,6 +22,7 @@ class MySQL{ // 사용시 클래스 (AUtO) 로드 필요
     private $connection = null; //DB 객체 담기
     private $errorLogStatus = true; //에러로그 사용 여부 true : 사용 , false : 미사용
     private $transaction = false; //트랜잭션 사용 시 true 전환 연결 닫지 않기
+    private $transactionStatus = false; //트랜잭션 실행 상태
     
 
     function __construct(){//기본생성자 생성
@@ -170,6 +171,8 @@ class MySQL{ // 사용시 클래스 (AUtO) 로드 필요
         * @param error  TIME_ZONE ERROR : 시간 설정 오류일 경우 (없을 경우)
         * @param error  NONE DATA TYPE : 설정된 데이터 타입이 아닙니다.
         * @param error  TRANSACTION ERROR : 트랜잭션 실행 오류
+        * @param error  TRANSACTION START ERROR : 트랜잭션 미실행 오류
+        * @param error  TRANSACTION STATUS ERROR : 트랜잭션 Default 상태 변경 필요
         * @param error  COMMIT ERROR : 커밋 에러
         * @param error  ROLLBACK ERROR : 롤백 에러
         * @param error  NONE : 설정된 에러항목이 없음
@@ -204,6 +207,14 @@ class MySQL{ // 사용시 클래스 (AUtO) 로드 필요
                 case "NONE DATA TYPE":
                     $errorType = "NONE DATA TYPE";
                     $text = $errorType . " : " . "설정된 데이터 타입이 아닙니다.";
+                    break;
+                case "TRANSACTION STATUS ERROR":
+                    $errorType = "TRANSACTION STATUS ERROR";
+                    $text = $errorType . " : " . "트랜잭션 Default값을 false로 변갱해주세요.";
+                    break;
+                case "TRANSACTION START ERROR":
+                    $errorType = "TRANSACTION START ERROR";
+                    $text = $errorType . " : " . "트랜잭션을 먼저 실행해주세요.";
                     break;
                 case "COMMIT ERROR":
                     $errorType = "COMMIT ERROR";
@@ -254,14 +265,31 @@ class MySQL{ // 사용시 클래스 (AUtO) 로드 필요
         print_r($script);
     }
 
+    function removeElement($class){
+        $toggle = "<script>
+        let pre = document.querySelector('." . $class ."');pre.remove();</script>";
+        print_r($toggle);
+    }
+
+
     //트랜잭션
     function transaction(){
         $query = "START TRANSACTION;";
-        $this->transaction = true;
         try{
-           if(mysqli_query($this->connection , $query)){
-                self::debug_log("TRANSACTION START" , "transaction");
-           };
+            if($this->transaction == false){
+                $this->transaction = true;
+                $this->transactionStatus = true;
+                if(mysqli_query($this->connection , $query)){
+                    self::debug_log("TRANSACTION START" , "transaction");
+                    $result = "COMMIT , ROLLBACK 실행필요";
+                    print(sprintf("<pre class='transaction' style='background-color : 000000; color : white; font-family : fangsong; font-weight : bold; padding : 0.2rem;'>%s</pre>" , print_r($result , true)));
+                    return true;
+                };
+            }else{
+                $type = "TRANSACTION STATUS ERROR";
+                self::error_log($type);
+                return false;
+            }
         }catch(mysqli_sql_exception $error){
             $type = "TRANSACTION ERROR";
             self::error_log($type , $error->getMessage());
@@ -271,11 +299,19 @@ class MySQL{ // 사용시 클래스 (AUtO) 로드 필요
     
     function commit(){
         $query = "COMMIT;";
-        $this->transaction = false;
         try{
-            if(mysqli_query($this->connection , $query)){
-                self::debug_log("COMMIT SUCCESS" , "transaction");
-            };
+            if($this->transaction == true && $this->transactionStatus == true){
+                $this->transaction = false;
+                if(mysqli_query($this->connection , $query)){
+                    self::debug_log("COMMIT SUCCESS" , "transaction");
+                    self::removeElement("transaction");
+                    return true;
+                };
+            }else{
+                $type = "TRANSACTION START ERROR";
+                self::error_log($type);
+                return false;
+            }
         }catch(mysqli_sql_exception $error){
             $type = "COMMIT ERROR";
             self::error_log($type , $error->getMessage());
@@ -285,11 +321,19 @@ class MySQL{ // 사용시 클래스 (AUtO) 로드 필요
     
     function rollback(){
         $query = "ROLLBACK;";
-        $this->transaction = false;
         try{
-            if(mysqli_query($this->connection , $query)){
-                self::debug_log("ROLLBACK SUCCESS" , "transaction");
-            };
+            if($this->transaction == true && $this->transactionStatus == true){
+                $this->transaction = false;
+                if(mysqli_query($this->connection , $query)){
+                    self::debug_log("ROLLBACK SUCCESS" , "transaction");
+                    self::removeElement("transaction");
+                    return true;
+                };
+            }else{
+                $type = "TRANSACTION START ERROR";
+                self::error_log($type);
+                return false;
+            }
         }catch(mysqli_sql_exception $error){
             $type = "ROLLBACK ERROR";
             self::error_log($type , $error->getMessage());
