@@ -266,11 +266,9 @@ class MySQL{ // 사용시 클래스 (AUtO) 로드 필요
     }
 
     function removeElement($class){
-        $toggle = "<script>
-        let pre = document.querySelector('." . $class ."');pre.remove();</script>";
-        print_r($toggle);
+        $removeElement = "<script>document.querySelector('." . $class ."').remove();</script>";
+        print_r($removeElement);
     }
-
 
     //트랜잭션
     function transaction(){
