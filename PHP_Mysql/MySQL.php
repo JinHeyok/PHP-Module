@@ -244,9 +244,13 @@ class MySQL{ // 사용시 클래스 (AUtO) 로드 필요
         }
     }
 
-    function debug_log($message){
+    function debug_log($message , $status = ""){
         //디버깅용 array, object 출력할 수도 있으므로 JSON으로 출력
-        $script = "<script>console.log('Debugging : " . json_encode($message) . "');</script>";
+        if($status == "transaction"){
+            $script = "<script>console.log('Transaction : " . json_encode($message) . "');</script>";
+        }else{
+            $script = "<script>console.log('Debugging : " . json_encode($message) . "');</script>";
+        }
         print_r($script);
     }
 
@@ -255,7 +259,9 @@ class MySQL{ // 사용시 클래스 (AUtO) 로드 필요
         $query = "START TRANSACTION;";
         $this->transaction = true;
         try{
-            mysqli_query($this->connection , $query);
+           if(mysqli_query($this->connection , $query)){
+                self::debug_log("TRANSACTION START" , "transaction");
+           };
         }catch(mysqli_sql_exception $error){
             $type = "TRANSACTION ERROR";
             self::error_log($type , $error->getMessage());
@@ -267,7 +273,9 @@ class MySQL{ // 사용시 클래스 (AUtO) 로드 필요
         $query = "COMMIT;";
         $this->transaction = false;
         try{
-            mysqli_query($this->connection , $query);
+            if(mysqli_query($this->connection , $query)){
+                self::debug_log("COMMIT SUCCESS" , "transaction");
+            };
         }catch(mysqli_sql_exception $error){
             $type = "COMMIT ERROR";
             self::error_log($type , $error->getMessage());
@@ -279,7 +287,9 @@ class MySQL{ // 사용시 클래스 (AUtO) 로드 필요
         $query = "ROLLBACK;";
         $this->transaction = false;
         try{
-            mysqli_query($this->connection , $query);
+            if(mysqli_query($this->connection , $query)){
+                self::debug_log("ROLLBACK SUCCESS" , "transaction");
+            };
         }catch(mysqli_sql_exception $error){
             $type = "ROLLBACK ERROR";
             self::error_log($type , $error->getMessage());
