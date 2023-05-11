@@ -6,7 +6,7 @@ class MySQL{ // 사용시 클래스 (AUtO) 로드 필요
     const HOST = "localhost"; //host 정보 
     const USER = "root"; // 아이디 정보 
     const PASS = "root"; // 패스워드 정보 
-    const DB = "react_project"; // DB명 정보
+    const DB = "sql_study"; // DB명 정보
 
     private static $servername = self::HOST;
     private static $username = self::USER;
@@ -15,49 +15,58 @@ class MySQL{ // 사용시 클래스 (AUtO) 로드 필요
 
     const MYSQL = "MySQL";
     //session에 넣을 MySQL Object key값
-
+    
     private static $timezone = "Asia/Seoul"; //시간설정 
-    private static $charset = "utf8mb4"; //인코딩 설정 
+    private static $charset = "utf8mb4"; //인코딩 설정 (이모지로 인해 4byte)
 
     private $connection = null;
-
+    private $errorLogStatus = true; //에러로그 사용 여부 true : 사용 , false : 미사용
 
     function __construct(){//기본생성자 생성
-        // session_start(); // 로컬 테스트시 사용
+        session_start();
         try {
             // DB연결
-            if ($_SESSION[self::MYSQL] == "" || $_SESSION[self::MYSQL] == null) {
+            if (empty($_SESSION[self::MYSQL])) {
 
                 $conn = mysqli_connect(self::$servername, self::$username, self::$password, self::$dbname);
                 $conn->set_charset(self::$charset);
-                // $conn->query("SET time_zone='" . self::$timezone . "'"); //로컬에서는 주석처리
+                $conn->query("SET GLOBAL time_zone = '" . self::$timezone . "';"); //시간 설정 
+                $conn->query("SET names '" . self::$charset . "';");
+
+                /**
+                 * @property request character_set_client : MySQL 클라이언트의 기본이 되는 캐릭터셋, 클라이언테엇 서버로 전송하는 SQL문에 대한 인코딩 
+                 * @property request character_set_connection : 클라이언트로부터 수신한 Character set introducer가 없는 리터럴에 대한 기본 캐릭터 셋을 의미
+                 * @property request character_set_results : Client가 데이터를 조회할 경우, Server는 해당 캐릭터 셋으로 인코딩하여 전송한다.
+                 */
+                //위 세가지를 UTF8MB4로 설정 SET names 사용시 3개 설정을 동시에 설정 가능 
+
                 if ($conn) {
                     $_SESSION[self::MYSQL]  = $conn;
                     $this->connection = $conn;
-                } else {
-                    $type = "CONNECTION ERROR";
-                    self::error_log($type , mysqli_connect_error());
                 }
+
             } else {
                 $conn = $_SESSION[self::MYSQL];
             }
 
             $this->connection = $conn;
+
         } catch (mysqli_sql_exception $error) {
-            $type = "CONNECTION ERROR";
-            self::error_log($type, $error->getMessage());
-            return false;
+            if(strpos($error->getMessage() , "Unknown or incorrect time zone: 'Asia/Seoul'") !== false){
+                $type = "TIME_ZONE ERROR";
+                self::error_log($type, $error->getMessage());
+                return false;
+            }else{
+                $type = "CONNECTION ERROR";
+                self::error_log($type, $error->getMessage());
+                return false;
+            }
         }
     }
 
-    function __destruct(){ //생성자 제거
-        // unset($_SESSION[self::MYSQL]); //로컬 테스트시 사용
-        $this->clear();
-    }
-
-    function clear(){//DB 해제 
-        if ($_SESSION[self::MYSQL] == "" || $_SESSION[self::MYSQL] == null) {
-            session_unset(self::MYSQL);
+    function __destruct(){ //생성자 제거, DB 해제
+        if (!empty($_SESSION[self::MYSQL])) {
+            unset($_SESSION[self::MYSQL]);
         }
     }
 
@@ -92,8 +101,8 @@ class MySQL{ // 사용시 클래스 (AUtO) 로드 필요
         $text = "";
         $aliasCount = "";
 
-        if(count($column) == 1){
-        
+        if(count($column) == 1 && count($column[0]) == 1){
+
             foreach($column as $item){
 
                 $keyName = strtolower(key($item)); //대문자로 alias를 쓸 경우 소문자로 변경
@@ -101,8 +110,7 @@ class MySQL{ // 사용시 클래스 (AUtO) 로드 필요
 
                 $objCount = new stdClass;
 
-                if($keyName != "count"){
-                    
+                if($keyName == "count(*)"){
                     $countStr = substr($keyName , 6 , 1);//count(뒤부터 시작되는 언어를 가져옴
                     $countSplit = explode($countStr , $keyName);//자른 언어를 기준으로 배열로 자른다.
 
@@ -122,12 +130,12 @@ class MySQL{ // 사용시 클래스 (AUtO) 로드 필요
                 }
 
             }
-
             if($text  == "count()" || $aliasCount){//count함수가 있으면 true;
-                if($value != 0){
+                if(gettype($value) == "integer"){
                     $objCount->count = $value;
+                    $objCount->status = true;
                 }else{
-                    $objCount->count = null;
+                    $objCount->status = false;
                 }
                 return $objCount;
             }else{
@@ -144,63 +152,72 @@ class MySQL{ // 사용시 클래스 (AUtO) 로드 필요
     }
 
     function error_log($type, $error_message = ""){    
-
-        /** 
-        * @param type NO DELETE CHANGED : 삭제된 데이터가 없을 경우 
-        * @param type NO UPDATE CHANGED : 변경된 데이터가 없을 경우
-        * @param type NO SELECT DATA : 검색된 데이터가 없을 경우 
-        * @param type NONE COUNT : 바인드수와 데이터수가 동일하지 않을 경우
-        * @param type NONE TABLE : 테이블명이 존재하지 않을 경우 
-        * @param type NONE INSERT DATA : 정상실행이지만 추가된 데이터가 없을 경우
-        * @param type SQL ERROR : SQL 에러일 경우
-        * @param type CONNECTION ERROR : 연결정보 오류일 경유
-        * @param type NONE : 설정된 에러항목이 없음
-         */
-
-        $text = "";
-        $errorType = "";
         
-        switch ($type) {
-            case "NO DELETE CHANGED":
-                $text = "정상적으로 실행되었지만 삭제된 데이터가 없습니다.";
-                $errorType = "NO DELETE CHANGED";
-                break;
-            case "NO UPDATE CHANGED":
-                $text = "정상적으로 실행되었지만 변경된 데이터가 없습니다.";
-                $errorType = "NO UPDATE CHANGED";
-                break;
-            case "NO SELECT DATA":
-                $text = "정상적으로 실행되었지만 검색된 데이터가 없습니다.";
-                $errorType = "NO SELECT DATA";
-                break;
-            case "NONE COUNT":
-                $text = "바인드수와 데이터수가 동일하지 않습니다.";
-                $errorType = "NONE COUNT";
-                break;
-            case "NONE TABLE":
-                $text = "테이블명이 존재하지 않습니다.";
-                $errorType = "NONE TABLE";
-                break;
-            case "NONE INSERT DATA":
-                $text = "정상적으로 실행되었지만 추가된 데이터가 없습니다.";
-                $errorType = "NONE INSERT DATA";
-                break;
-            case "SQL ERROR":
-                $text = $error_message;
-                $errorType = "SQL ERROR";
-                break;
-            case "CONNECTION ERROR":
-                $text = $error_message;
-                $errorType = "CONNECTION ERROR";
-                break;
-            default:
-                $text = "설정된 에러항목이 없습니다.";
-                $errorType  = "NONE";
-                break;
-        } 
-        // $script = '<script>console.log("' . $errorType  . ' : '  . $text . '");</script>';
-        // print_r($script);
-        print(sprintf("<pre style='background-color : 330000; color : white; font-family : fangsong; font-weight : bold; padding : 0.2rem; white-space : pre-wrap;'>%s</pre>" , print_r($errorType . " : " .  $text , true)));
+        /** 
+        * @param error  NO DELETE CHANGED : 삭제된 데이터가 없을 경우 
+        * @param error  NO UPDATE CHANGED : 변경된 데이터가 없을 경우
+        * @param error  NO SELECT DATA : 검색된 데이터가 없을 경우 
+        * @param error  NONE COUNT : 바인드수와 데이터수가 동일하지 않을 경우
+        * @param error  NONE TABLE : 테이블명이 존재하지 않을 경우 
+        * @param error  NONE INSERT DATA : 정상실행이지만 추가된 데이터가 없을 경우
+        
+        * @param error  SQL ERROR : SQL 에러일 경우
+        * @param error  CONNECTION ERROR : 연결정보 오류일 경유
+        * @param error  TIME_ZONE ERROR : 시간 설정 오류일 경우 (없을 경우)
+        * @param error  NONE : 설정된 에러항목이 없음
+        */
+
+        if($this->errorLogStatus == true){
+
+            $text = "";
+            $errorType = "";
+            
+            switch ($type) {
+                case "NO DELETE CHANGED":
+                    $errorType = "NO DELETE CHANGED";
+                    $text = $errorType . " : " . "정상적으로 실행되었지만 삭제된 데이터가 없습니다.";
+                    break;
+                case "NO UPDATE CHANGED":
+                    $errorType = "NO UPDATE CHANGED";
+                    $text = $errorType . " : " . "정상적으로 실행되었지만 변경된 데이터가 없습니다.";
+                    break;
+                case "NO SELECT DATA":
+                    $errorType = "NO SELECT DATA";
+                    $text = $errorType . " : " . "정상적으로 실행되었지만 검색된 데이터가 없습니다.";
+                    break;
+                case "NONE COUNT":
+                    $errorType = "NONE COUNT";
+                    $text = $errorType . " : " . "바인드수와 데이터수가 동일하지 않습니다.";
+                    break;
+                case "NONE TABLE":
+                    $errorType = "NONE TABLE";
+                    $text = $errorType . " : " . "테이블명이 존재하지 않습니다.";
+                    break;
+                case "NONE INSERT DATA":
+                    $errorType = "NONE INSERT DATA";
+                    $text = $errorType . " : " . $error_message;
+                    break;
+                case "SQL ERROR":
+                    $errorType = "SQL ERROR";
+                    $text = $errorType . " : " . $error_message;
+                    break;
+                case "TIME_ZONE ERROR":
+                    $errorType = "TIME_ZONE ERROR";
+                    $text = $errorType . " : " . $error_message . " (time_zone 데이터가 없습니다.)";
+                    break;
+                case "CONNECTION ERROR":
+                    $errorType = "CONNECTION ERROR";
+                    $text = $errorType . " : " .  $error_message;
+                    break;
+                default:
+                    $errorType  = "NONE";
+                    $text = $errorType . " : " . "설정된 에러항목이 없습니다.";
+                    break;
+            } 
+            // $script = '<script>console.log("' . $errorType  . ' : '  . $text . '");</script>';
+            // print_r($script);
+            print(sprintf("<pre style='background-color : 330000; color : white; font-family : fangsong; font-weight : bold; padding : 0.2rem; white-space : pre-wrap;'>%s</pre>" , print_r($text , true)));
+        }
     }
 
     function debug_log($message){
@@ -228,6 +245,7 @@ class MySQL{ // 사용시 클래스 (AUtO) 로드 필요
         $query = "INSERT INTO " . $obj->table . " ( " . $column . ") VALUES (" .  $parameter . ");";
         //실행될 쿼리 입력
 
+
         if(strlen($bind) != $questionCount){//바인드와 데이터가 맞지 않을경우 
             $type = "NONE COUNT";
             self::error_log($type);
@@ -243,7 +261,7 @@ class MySQL{ // 사용시 클래스 (AUtO) 로드 필요
         try {
 
             $statement = $this->connection->prepare($query);//쿼리 준비
-    
+
             if ($statement) {
     
                 if ($bind != "" && sizeof($value) > 0) {
@@ -256,7 +274,7 @@ class MySQL{ // 사용시 클래스 (AUtO) 로드 필요
                     $statement->close(); //쿼리해제
                     return true;
                 }else{
-                    self::error_log("NONE INSERT DATA");
+                    self::error_log("NONE INSERT DATA" , "실행하였지만 추가된 Data가 없습니다.");
                     $statement->close();
                     return false;
                 }
@@ -317,49 +335,47 @@ class MySQL{ // 사용시 클래스 (AUtO) 로드 필요
         }
         
         $objList = array();//객체 리스트를 담을 배열 생성
-        $listCount = self::countCheck($list); //count를 구하는지 체크
+        $countCheck = self::countCheck($list); //count를 구하는지 체크
 
-        if(count($list) == 0 && $listCount->count == null){ //0개여도 return
-            $type = "NO SELECT DATA";
-            self::error_log($type);
-            return false;
-        }
-
-
-        if (count($list) > 1) { //배열의 길이가 1보다 낮으면 객체로 리턴 아닐 시 배열로 리턴
+        if (!empty($list) && count($list) > 1) { //배열의 길이가 1보다 낮으면 객체로 리턴 아닐 시 배열로 리턴
             //리스트
             foreach ($list as $key => $item) {
                 $obj = new stdClass;
                 $column = array_keys($item);//key이름만 배열 형태로 전환
                 
                 foreach ($column as $columnName) {
-                    $obj->$columnName = htmlspecialchars($item[$columnName]);
-                    //객체->키이름 = value값을 담아준다. htmlspecialchars : XSS 방지
+                    $obj->$columnName = $item[$columnName];
+                    //객체->키이름 = value값을 담아준다.
                 }
                 $objList[$key] = $obj;
                 //객체 리스트를 만들어준다.
             }
             return $objList;
 
-        } else {
+        } else if(!empty($list) && count($list) == 1){
             //단일
+
             foreach ($list as $key => $item) {
                 $obj = new stdClass;
                 $column = array_keys($item);//key이름만 배열 형태로 전환
-                
-                $countCheck = self::countCheck($list);//컬럼이 count인지 아닌지 확인
 
                 foreach ($column as $columnName) {
-                    if($countCheck->count > 0){//갯수를 구할 시 갯수만 리턴
-                         $count = htmlspecialchars($item[$columnName]);
-                         return $count; //실제 갯수만 리턴
+                    if(!empty($countCheck->status)){//갯수를 구할 시 갯수만 리턴
+                        if($countCheck->status == true){
+                            $count = $item[$columnName];
+                            return $count; //실제 갯수만 리턴
+                        }
                     }else{
-                        $obj->$columnName = htmlspecialchars($item[$columnName]);
-                        //객체->키이름 = value값을 담아준다. htmlspecialchars : XSS 방지
+                        $obj->$columnName = $item[$columnName];
+                        //객체->키이름 = value값을 담아준다.
                     }
                 }
                 return $obj;
             }
+        }else{
+            $type = "NO SELECT DATA";
+            self::error_log($type);
+            return false;
         }
     }
 

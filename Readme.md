@@ -4,6 +4,11 @@
 - 02/09 SQL, CONNECTION 에러에대한 표시 구성 완료
 - 04/17 DB 에러문구 출력 변경, 데이터 표시 변경 
 - 04/18 READE.MD 작성
+- 05/11  
+    - SELECT count 조회 오류 수정
+    - ErrorLog 사용 여부 추가 (true/false)
+    - time_zone 설정 추가 (Asia/Seoul)
+    - charset 설정 추가 (utf8mb4)
 
 ### PHP Excel1.8 모둘 (2007)
 - - -
