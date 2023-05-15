@@ -6,6 +6,16 @@
     - Bind 될 Data의 갯수에 따라 '?' 와 DataType 자동 삽입
     - Bind 될 Data가 없어도 정상 실행
     - transaction 구현 class에서 가져와 사용 , commit , rollback 동일
+#
+    - transaction 예시문
+     $db = new MySQL;
+     $db->transaction(); 
+     $query ... 실행 (INSERT , UPDATE , DELETE ...)
+     $db->commit(); OR $db->rollback();
+>설명
+1. transaction() 트랜잭션 실행
+2. 원하는 Query 실행
+3. 실행 상태에 따라 commit OR rollback 실행
 --- 
 ## - SELECT
     - 예시문

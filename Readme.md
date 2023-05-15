@@ -12,8 +12,9 @@
     - INSERT query 추가, bindType double 오류 수정
     - 연결해제 종료 오류 수정
     - TRANSACTION 기능 추가
-- 05/11 INSERT 실행 고도화 작업
-
+- 05/11 
+    - INSERT 실행 고도화 작업
+    - 트랜잭션 로그 사용 여부 작업
 ### PHP Excel1.8 모둘 (2007)
 - - -
 - 구현 필요

@@ -21,6 +21,7 @@ class MySQL{ // 사용시 클래스 (AUtO) 로드 필요
     
     private $connection = null; //DB 객체 담기
     private $errorLogStatus = true; //에러로그 사용 여부 true : 사용 , false : 미사용
+    private $tranasctionLogStatus = true; //트랜잭션 상태 출력 true : 사용 , false : 미사용
     private $transaction = false; //트랜잭션 사용 시 true 전환 연결 닫지 않기
     private $transactionStatus = false; //트랜잭션 실행 상태
     
@@ -279,13 +280,15 @@ class MySQL{ // 사용시 클래스 (AUtO) 로드 필요
     function transaction(){
         $query = "START TRANSACTION;";
         try{
-            if($this->transaction == false){
+            if(!$this->transaction){
                 $this->transaction = true;
                 $this->transactionStatus = true;
                 if(mysqli_query($this->connection , $query)){
-                    self::debug_log("TRANSACTION START" , "transaction");
-                    $result = "COMMIT , ROLLBACK 실행 필요";
-                    print(sprintf("<pre class='transaction' style='background-color : 000000; color : white; font-family : fangsong; font-weight : bold; padding : 0.2rem;'>%s</pre>" , print_r($result , true)));
+                    if($this->tranasctionLogStatus){
+                        self::debug_log("TRANSACTION START" , "transaction");
+                        $result = "COMMIT , ROLLBACK 실행 필요";
+                        print(sprintf("<pre class='transaction' style='background-color : 000000; color : white; font-family : fangsong; font-weight : bold; padding : 0.2rem;'>%s</pre>" , print_r($result , true)));
+                    }
                     return true;
                 };
             }else{
@@ -303,11 +306,13 @@ class MySQL{ // 사용시 클래스 (AUtO) 로드 필요
     function commit(){
         $query = "COMMIT;";
         try{
-            if($this->transaction == true && $this->transactionStatus == true){
+            if($this->transaction && $this->transactionStatus){
                 $this->transaction = false;
                 if(mysqli_query($this->connection , $query)){
-                    self::debug_log("COMMIT SUCCESS" , "transaction");
-                    self::removeElement("transaction");
+                    if($this->tranasctionLogStatus){
+                        self::debug_log("COMMIT SUCCESS" , "transaction");
+                        self::removeElement("transaction");
+                    }
                     return true;
                 };
             }else{
@@ -325,11 +330,13 @@ class MySQL{ // 사용시 클래스 (AUtO) 로드 필요
     function rollback(){
         $query = "ROLLBACK;";
         try{
-            if($this->transaction == true && $this->transactionStatus == true){
+            if($this->transaction && $this->transactionStatus){
                 $this->transaction = false;
                 if(mysqli_query($this->connection , $query)){
-                    self::debug_log("ROLLBACK SUCCESS" , "transaction");
-                    self::removeElement("transaction");
+                    if($this->tranasctionLogStatus){
+                        self::debug_log("ROLLBACK SUCCESS" , "transaction");
+                        self::removeElement("transaction");
+                    }
                     return true;
                 };
             }else{
@@ -424,7 +431,7 @@ class MySQL{ // 사용시 클래스 (AUtO) 로드 필요
             
         }
 
-        if(sizeof($dataValue) == 0){
+        if(sizeof($dataValue) == 0){//바인드할 데이터가 없을 경우
             $type = "NONE BIND DATA";
             self::error_log($type);
             return false;
