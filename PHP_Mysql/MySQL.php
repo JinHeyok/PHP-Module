@@ -267,7 +267,7 @@ class MySQL{ // 사용시 클래스 (AUtO) 로드 필요
 
     function removeElement($class){
         $removeElement = "<script>document.querySelector('." . $class ."').remove();</script>";
-        print_r($removeElement);
+        echo $removeElement;
     }
 
     //트랜잭션
@@ -279,7 +279,7 @@ class MySQL{ // 사용시 클래스 (AUtO) 로드 필요
                 $this->transactionStatus = true;
                 if(mysqli_query($this->connection , $query)){
                     self::debug_log("TRANSACTION START" , "transaction");
-                    $result = "COMMIT , ROLLBACK 실행필요";
+                    $result = "COMMIT , ROLLBACK 실행 필요";
                     print(sprintf("<pre class='transaction' style='background-color : 000000; color : white; font-family : fangsong; font-weight : bold; padding : 0.2rem;'>%s</pre>" , print_r($result , true)));
                     return true;
                 };
