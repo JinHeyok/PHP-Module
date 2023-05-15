@@ -163,6 +163,7 @@ class MySQL{ // 사용시 클래스 (AUtO) 로드 필요
         * @param error  NO UPDATE CHANGED : 변경된 데이터가 없을 경우
         * @param error  NO SELECT DATA : 검색된 데이터가 없을 경우 
         * @param error  NONE COUNT : 바인드수와 데이터수가 동일하지 않을 경우
+        * @param error  NONE BIND DATA : 바인드 할 데이터가 없을 경우
         * @param error  NONE TABLE : 테이블명이 존재하지 않을 경우 
         * @param error  NONE INSERT DATA : 정상실행이지만 추가된 데이터가 없을 경우
         
@@ -199,6 +200,10 @@ class MySQL{ // 사용시 클래스 (AUtO) 로드 필요
                 case "NONE COUNT":
                     $errorType = "NONE COUNT";
                     $text = $errorType . " : " . "바인드수와 데이터수가 동일하지 않습니다.";
+                    break;
+                case "NONE BIND DATA":
+                    $errorType = "NONE BIND DATA";
+                    $text = $errorType . " : " . "바인드할 데이터가 존재하지 않습니다.";
                     break;
                 case "NONE TABLE":
                     $errorType = "NONE TABLE";
@@ -358,6 +363,7 @@ class MySQL{ // 사용시 클래스 (AUtO) 로드 필요
         $bind = "";
         $parameter = "";
         $questionCount = 0;
+        $questionString = "";
 
         if(gettype($obj) === "object"){
 
@@ -390,11 +396,38 @@ class MySQL{ // 사용시 클래스 (AUtO) 로드 필요
             foreach($data as $key => $item){
                 array_push($dataValue , $item);
             }
-
             $bind = self::bindType($dataValue);
-            $questionCount = substr_count($obj , "?");//?수 가져오기
-            $query = $obj;
             
+            if(strpos($obj , strtoupper("values")) || strpos($obj , strtolower("VALUES"))){
+
+                $questionCount = substr_count($obj , "?");//?수 가져오기
+                $query = $obj;
+                
+            }else{  
+
+                $questionString = explode("(" , $obj);
+                $questionString = explode(")" , $questionString[1])[0];
+                $questionCount = count(explode( "," ,$questionString));
+                $questionString = "";
+                
+                for ($i=0; $i < $questionCount; $i++) { 
+                    if($i == 0){
+                        $questionString .= "?";
+                    }else{
+                        $questionString .= " , ?";
+                    }
+                }
+                
+                $query = $obj . " VALUES ( " . $questionString . " );";
+
+            }
+            
+        }
+
+        if(sizeof($dataValue) == 0){
+            $type = "NONE BIND DATA";
+            self::error_log($type);
+            return false;
         }
 
         if(strlen($bind) != $questionCount){//바인드와 데이터가 맞지 않을경우 
@@ -634,8 +667,10 @@ class MySQL{ // 사용시 클래스 (AUtO) 로드 필요
                 }
     
                 $statement->execute(); //쿼리실행
+
+                print_r($statement);
     
-                if ($statement->insert_id || $statement->affected_rows) {
+                if ($statement->affected_rows) {
                     $statement->close();
                     return true;
                 }else{

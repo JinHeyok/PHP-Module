@@ -34,10 +34,15 @@
     $insertObj->table = tableName;
     $insertStatus = $db->insert($insertObj);
 
-    * String
+    * String 1-1
     $insertString = "INSERT INTO emp (column1 , column2 , column3 ) VALUES (? , ? , ?);";
     $insertData = array(data1 , 0 , data2);
     $insertStatus = $db->insert($insertString , $insertData);
+
+    * String 1-2
+    $insetString "INSERT INTO emp (column1 , column2 , column3);
+    $insertData = array(data1 , 0 , data2);
+    $insetStatus = $db->inset($insetString , $insetData);
 
 > 설명
 - Object
@@ -50,6 +55,7 @@
 - String
     1. Query를 문장형으로 생성
     2. prepare 사용으로 삽입할 데이터를 배열로 만듬 
+    3. String 1-2로 사용할 경우 VALUES 부터 문구 자동 생성
 ---
 - 객체명이 테이블명이 된다.
 - Query형으로 데이터를 문장과 같이 사용할 경우 실행 가능
@@ -87,6 +93,7 @@
 |COMMIT ERROR|커밋 실행 오류|mysqli_sql_exception Error 출력|
 |ROLLBACK ERROR|롤백 실행 오류|mysqli_sql_exception Error 출력|
 |NONE COUNT|바인드 수와 데이터 수가 동일하지 않을 경우|"바인드 수와 데이터 수가 동일하지 않습니다."|
+|NONE BIND DATA|바인드 할 데이터가 존재하지 않을 경우|"바인드 할 데이터가 존재하지 않습니다."|
 |NONE TABLE|테이블 명이 존재하지 않을 경우|"테이블명이 존재하지 않습니다."|
 |NONE DATA TYPE|설정된 데이터 타입이 아닐 경우|"설정된 데이터 타입이 아닙니다."|
 |NONE INSERT DATA|정상 실행되었지만 추가된 데이터가 없을 경우|"정상적으로 실행되었지만 추가된 데이터가 없습니다."|
