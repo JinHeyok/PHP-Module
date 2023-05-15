@@ -697,8 +697,6 @@ class MySQL{ // 사용시 클래스 (AUtO) 로드 필요
     
                 $statement->execute(); //쿼리실행
 
-                print_r($statement);
-    
                 if ($statement->affected_rows) {
                     $statement->close();
                     return true;
