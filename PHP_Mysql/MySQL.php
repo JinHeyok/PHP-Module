@@ -461,9 +461,13 @@ class MySQL{ // 사용시 클래스 (AUtO) 로드 필요
     
                 $statement->execute();// Query 실행
                 $statement = $statement->get_result();// SELECT한 값을 담아준다. 
+
+                if($statement->num_rows == 0){
+                    $type = "NO SELECT DATA";
+                    self::error_log($type);
+                    return false;
+                }
     
-            } else {
-                print_r($statement->error_log());
             }
     
             $list = array();//데이터를 담아줄 배열 생성
@@ -519,10 +523,6 @@ class MySQL{ // 사용시 클래스 (AUtO) 로드 필요
                 }
                 return $obj;
             }
-        }else{
-            $type = "NO SELECT DATA";
-            self::error_log($type);
-            return false;
         }
     }
 
