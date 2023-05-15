@@ -54,6 +54,12 @@
     $insertData = array(data1 , 0 , data2);
     $insetStatus = $db->inset($insetString , $insetData);
 
+    * String 1-3
+    $insertString = "column1 , column2 , column3";
+    $insertData = array(data1, 0, data2);
+    $table = "tableName";
+    $insertStatus = $db->insert($insertString , $insertData , $table);
+
 > 설명
 - Object
     1. 빈 클래스를 생성한다. 
@@ -65,7 +71,8 @@
 - String
     1. Query를 문장형으로 생성
     2. prepare 사용으로 삽입할 데이터를 배열로 만듬 
-    3. String 1-2로 사용할 경우 VALUES 부터 문구 자동 생성
+    3. String 1-2으로 사용할 경우 VALUES 부터 문구 자동 생성
+    4. String 1-3으로 사용할 경우 컬럼명만 입력 , 테이블명 파라미터 전달 필수
 ---
 - 객체명이 테이블명이 된다.
 - Query형으로 데이터를 문장과 같이 사용할 경우 실행 가능

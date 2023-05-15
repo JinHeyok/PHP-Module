@@ -21,6 +21,7 @@ class MySQL{ // 사용시 클래스 (AUtO) 로드 필요
     
     private $connection = null; //DB 객체 담기
     private $errorLogStatus = true; //에러로그 사용 여부 true : 사용 , false : 미사용
+
     private $tranasctionLogStatus = true; //트랜잭션 상태 출력 true : 사용 , false : 미사용
     private $transaction = false; //트랜잭션 사용 시 true 전환 연결 닫지 않기
     private $transactionStatus = false; //트랜잭션 실행 상태
@@ -352,7 +353,7 @@ class MySQL{ // 사용시 클래스 (AUtO) 로드 필요
     }
     //트랜잭션
     
-    function insert($obj , $data = array()){
+    function insert($obj , $data = array() , String $table = ""){
 
         /**
          * @param object 오브젝트 형식
@@ -398,19 +399,19 @@ class MySQL{ // 사용시 클래스 (AUtO) 로드 필요
             //실행될 쿼리 입력
 
 
-        }else if(gettype($obj) === "string"){
+        }else if(gettype($obj) === "string"){ 
 
             foreach($data as $key => $item){
                 array_push($dataValue , $item);
             }
             $bind = self::bindType($dataValue);
-            
-            if(strpos($obj , strtoupper("values")) || strpos($obj , strtolower("VALUES"))){
+
+            if(strpos($obj , strtoupper("values")) || strpos($obj , strtolower("VALUES"))){//완전한 Query 형 문장으로 들어올 떄
 
                 $questionCount = substr_count($obj , "?");//?수 가져오기
                 $query = $obj;
                 
-            }else{  
+            }else if(strpos($obj , strtoupper("into")) || strpos($obj , strtolower("INTO"))){//VALUES 부터 나머지 문장 자동 생성
 
                 $questionString = explode("(" , $obj);
                 $questionString = explode(")" , $questionString[1])[0];
@@ -425,9 +426,31 @@ class MySQL{ // 사용시 클래스 (AUtO) 로드 필요
                     }
                 }
                 
+                $questionCount = substr_count($questionString , "?");
                 $query = $obj . " VALUES ( " . $questionString . " );";
 
-            }
+            }else{//컬럼명만 문장으로 넘어올 때 
+
+                if($table == ""){//테이블이 없을 때
+                    $type = "NONE TABLE";
+                    self::error_log($type);
+                    return false;
+                }
+
+                $questionArray = explode("," , $obj);
+
+                for ($i=0; $i < count($questionArray); $i++) { 
+                    if($i == 0){
+                        $questionString .= "?";
+                    }else{
+                        $questionString .= " , ?";
+                    }
+                }
+
+                $questionCount = substr_count($questionString , "?");
+                $query = "INSERT INTO " . $table . " ( " . $obj . " ) VALUES ( " . $questionString . ");";
+
+            } 
             
         }
 
@@ -565,7 +588,6 @@ class MySQL{ // 사용시 클래스 (AUtO) 로드 필요
             }
         }
     }
-
 
     function update(string $query, $data = array()){
 
