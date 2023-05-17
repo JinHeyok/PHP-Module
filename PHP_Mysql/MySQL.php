@@ -1,6 +1,4 @@
 <?php
-
-
 class MySQL{ // 사용시 클래스 (AUtO) 로드 필요
 
     const HOST = "localhost"; //host 정보 
