@@ -258,7 +258,7 @@ class MySQL{ // 사용시 클래스 (AUtO) 로드 필요
             } 
             // $script = '<script>console.log("' . $errorType  . ' : '  . $text . '");</script>';
             // print_r($script);
-            print(sprintf("<pre style='background-color : 330000; color : white; font-family : fangsong; font-weight : bold; padding : 0.2rem; white-space : pre-wrap;'>%s</pre>" , print_r($text , true)));
+            print(sprintf("<pre style='background-color : 739C06; color : white; font-family : fangsong; font-weight : bold; padding : 0.2rem; white-space : pre-wrap;'>%s</pre>" , print_r($text , true)));
         }
     }
 
