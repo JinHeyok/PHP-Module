@@ -223,6 +223,10 @@ class MySQL{ // 사용시 클래스 (AUtO) 로드 필요
                     $errorType = "TRANSACTION START ERROR";
                     $text = $errorType . " : " . "트랜잭션을 먼저 실행해주세요.";
                     break;
+                case "NONE INSERT DATA":
+                    $errorType = "NONE INSERT DATA";
+                    $text = $errorType . " : " . "실행하였지만 추가된 Data가 없습니다.";
+                    break;
                 case "COMMIT ERROR":
                     $errorType = "COMMIT ERROR";
                     $text = $errorType . " : " . $error_message;
@@ -233,10 +237,6 @@ class MySQL{ // 사용시 클래스 (AUtO) 로드 필요
                     break;
                 case "TRANSACTION ERROR":
                     $errorType = "TRANSACTION ERROR";
-                    $text = $errorType . " : " . $error_message;
-                    break;
-                case "NONE INSERT DATA":
-                    $errorType = "NONE INSERT DATA";
                     $text = $errorType . " : " . $error_message;
                     break;
                 case "SQL ERROR":
@@ -452,7 +452,7 @@ class MySQL{ // 사용시 클래스 (AUtO) 로드 필요
                         $questionString .= " , ?";
                     }
                 }
-
+                
                 $questionCount = substr_count($questionString , "?");
                 $query = "INSERT INTO " . $table . " ( " . $obj . " ) VALUES ( " . $questionString . ");";
 
@@ -488,7 +488,7 @@ class MySQL{ // 사용시 클래스 (AUtO) 로드 필요
                     $statement->close(); //쿼리해제
                     return true;
                 }else{
-                    self::error_log("NONE INSERT DATA" , "실행하였지만 추가된 Data가 없습니다.");
+                    self::error_log("NONE INSERT DATA");
                     $statement->close();
                     return false;
                 }
