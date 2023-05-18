@@ -38,9 +38,9 @@ class MySQL{ // 사용시 클래스 (AUtO) 로드 필요
                 $conn->query("SET names '" . self::$charset . "';");
 
                 /**
-                 * @property request character_set_client : MySQL 클라이언트의 기본이 되는 캐릭터셋, 클라이언테엇 서버로 전송하는 SQL문에 대한 인코딩 
-                 * @property request character_set_connection : 클라이언트로부터 수신한 Character set introducer가 없는 리터럴에 대한 기본 캐릭터 셋을 의미
-                 * @property request character_set_results : Client가 데이터를 조회할 경우, Server는 해당 캐릭터 셋으로 인코딩하여 전송한다.
+                 * @property character_set_client : MySQL 클라이언트의 기본이 되는 캐릭터셋, 클라이언테엇 서버로 전송하는 SQL문에 대한 인코딩 
+                 * @property character_set_connection : 클라이언트로부터 수신한 Character set introducer가 없는 리터럴에 대한 기본 캐릭터 셋을 의미
+                 * @property character_set_results : Client가 데이터를 조회할 경우, Server는 해당 캐릭터 셋으로 인코딩하여 전송한다.
                  */
                 //위 세가지를 UTF8MB4로 설정 SET names 사용시 3개 설정을 동시에 설정 가능 
 
@@ -161,24 +161,24 @@ class MySQL{ // 사용시 클래스 (AUtO) 로드 필요
     function error_log($type, $error_message = ""){    
         
         /** 
-        * @param error  NO DELETE CHANGED : 삭제된 데이터가 없을 경우 
-        * @param error  NO UPDATE CHANGED : 변경된 데이터가 없을 경우
-        * @param error  NO SELECT DATA : 검색된 데이터가 없을 경우 
-        * @param error  NONE COUNT : 바인드수와 데이터수가 동일하지 않을 경우
-        * @param error  NONE BIND DATA : 바인드 할 데이터가 없을 경우
-        * @param error  NONE TABLE : 테이블명이 존재하지 않을 경우 
-        * @param error  NONE INSERT DATA : 정상실행이지만 추가된 데이터가 없을 경우
+        * @return NO_DELETE_CHANGED : 삭제된 데이터가 없을 경우 
+        * @return NO_UPDATE_CHANGED : 변경된 데이터가 없을 경우
+        * @return NO_SELECT_DATA : 검색된 데이터가 없을 경우 
+        * @return NONE_COUNT : 바인드수와 데이터수가 동일하지 않을 경우
+        * @return NONE_BIND_DATA : 바인드 할 데이터가 없을 경우
+        * @return NONE_TABLE : 테이블명이 존재하지 않을 경우 
+        * @return NONE_INSERT_DATA : 정상실행이지만 추가된 데이터가 없을 경우
         
-        * @param error  SQL ERROR : SQL 에러일 경우
-        * @param error  CONNECTION ERROR : 연결정보 오류일 경유
-        * @param error  TIME_ZONE ERROR : 시간 설정 오류일 경우 (없을 경우)
-        * @param error  NONE DATA TYPE : 설정된 데이터 타입이 아닙니다.
-        * @param error  TRANSACTION ERROR : 트랜잭션 실행 오류
-        * @param error  TRANSACTION START ERROR : 트랜잭션 미실행 오류
-        * @param error  TRANSACTION STATUS ERROR : 트랜잭션 Default 상태 변경 필요
-        * @param error  COMMIT ERROR : 커밋 에러
-        * @param error  ROLLBACK ERROR : 롤백 에러
-        * @param error  NONE : 설정된 에러항목이 없음
+        * @return SQL_ERROR : SQL 에러일 경우
+        * @return CONNECTION_ERROR : 연결정보 오류일 경유
+        * @return TIME_ZONE_ERROR : 시간 설정 오류일 경우 (없을 경우)
+        * @return NONE_DATA_TYPE : 설정된 데이터 타입이 아닙니다.
+        * @return TRANSACTION_ERROR : 트랜잭션 실행 오류
+        * @return TRANSACTION_START_ERROR : 트랜잭션 미실행 오류
+        * @return TRANSACTION_STATUS_ERROR : 트랜잭션 Default 상태 변경 필요
+        * @return COMMIT_ERROR : 커밋 에러
+        * @return ROLLBACK_ERROR : 롤백 에러
+        * @return NONE : 설정된 에러항목이 없음
         */
 
         if($this->errorLogStatus == true){
@@ -662,6 +662,12 @@ class MySQL{ // 사용시 클래스 (AUtO) 로드 필요
         }
         
         if(gettype($obj) === "object"){//객체형으로 실행
+            
+            if($obj->table == "" || $obj->table == null){ //테이블명을 빼먹을 경우 console에 출력 
+                $type = "NONE TABLE";
+                self::error_log($type);
+                return false;
+            }
 
             $deleteData = $obj->whereData; //삭제될 데이터
             $objColumn = $obj->whereColumn; //WHERE 뒤 컬럼명들
@@ -675,12 +681,6 @@ class MySQL{ // 사용시 클래스 (AUtO) 로드 필요
             for($j=0; $j < count($objType);  $j++){
                $deleteQuery .= $objType[$j] . " " . $objColumn[$j] . " = ? ";
                //맨앞은 where 컬럼은 이미 들어가 있으므로 type의 갯수에 맞춰서 삽입
-            }
-
-            if($obj->table == "" || $obj->table == null){ //테이블명을 빼먹을 경우 console에 출력 
-                $type = "NONE TABLE";
-                self::error_log($type);
-                return false;
             }
 
         }
