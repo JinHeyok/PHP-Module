@@ -18,9 +18,10 @@ class MySQL{ // 사용시 클래스 (AUtO) 로드 필요
     private static $charset = "utf8mb4"; //인코딩 설정 (이모지로 인해 4byte)
     
     private $connection = null; //DB 객체 담기
+    
     private $errorLogStatus = true; //에러로그 사용 여부 true : 사용 , false : 미사용
-
     private $tranasctionLogStatus = true; //트랜잭션 상태 출력 true : 사용 , false : 미사용
+
     private $transaction = false; //트랜잭션 사용 시 true 전환 연결 닫지 않기
     private $transactionStatus = false; //트랜잭션 실행 상태
     
@@ -87,7 +88,6 @@ class MySQL{ // 사용시 클래스 (AUtO) 로드 필요
             }
         }
 
-
         return $bind;
     }
 
@@ -135,6 +135,7 @@ class MySQL{ // 사용시 클래스 (AUtO) 로드 필요
                 }
 
             }
+
             if($text  == "count()" || $aliasCount){//count함수가 있으면 true;
                 if(gettype($value) == "integer"){
                     $objCount->count = $value;
@@ -154,6 +155,7 @@ class MySQL{ // 사용시 클래스 (AUtO) 로드 필요
 
     function data_log($result){
         print(sprintf("<pre style='background-color : 006600; color : white; font-family : fangsong; font-weight : bold; padding : 0.2rem;'>%s</pre>" , print_r($result , true)));
+        //print_r 문자로 가져오기 위해 true
     }
 
     function error_log($type, $error_message = ""){    
@@ -215,7 +217,7 @@ class MySQL{ // 사용시 클래스 (AUtO) 로드 필요
                     break;
                 case "TRANSACTION STATUS ERROR":
                     $errorType = "TRANSACTION STATUS ERROR";
-                    $text = $errorType . " : " . "트랜잭션 Default값을 false로 변갱해주세요.";
+                    $text = $errorType . " : " . "트랜잭션 Default값을 false로 변경해주세요.";
                     break;
                 case "TRANSACTION START ERROR":
                     $errorType = "TRANSACTION START ERROR";
@@ -291,8 +293,10 @@ class MySQL{ // 사용시 클래스 (AUtO) 로드 필요
                     return true;
                 };
             }else{
-                $type = "TRANSACTION STATUS ERROR";
-                self::error_log($type);
+                if($this->tranasctionLogStatus){
+                    $type = "TRANSACTION STATUS ERROR";
+                    self::error_log($type);
+                }
                 return false;
             }
         }catch(mysqli_sql_exception $error){
@@ -315,8 +319,10 @@ class MySQL{ // 사용시 클래스 (AUtO) 로드 필요
                     return true;
                 };
             }else{
-                $type = "TRANSACTION START ERROR";
-                self::error_log($type);
+                if($this->tranasctionLogStatus){
+                    $type = "TRANSACTION START ERROR";
+                    self::error_log($type);
+                }
                 return false;
             }
         }catch(mysqli_sql_exception $error){
@@ -339,8 +345,10 @@ class MySQL{ // 사용시 클래스 (AUtO) 로드 필요
                     return true;
                 };
             }else{
-                $type = "TRANSACTION START ERROR";
-                self::error_log($type);
+                if($this->tranasctionLogStatus){
+                    $type = "TRANSACTION START ERROR";
+                    self::error_log($type);
+                }
                 return false;
             }
         }catch(mysqli_sql_exception $error){
