@@ -105,6 +105,7 @@ class MySQL{ // 사용시 클래스 (AUtO) 로드 필요
 
         $text = "";
         $aliasCount = "";
+        $objCount = new stdClass;
 
         if(count($column) == 1 && count($column[0]) == 1){
 
@@ -113,21 +114,19 @@ class MySQL{ // 사용시 클래스 (AUtO) 로드 필요
                 $keyName = strtolower(key($item)); //대문자로 alias를 쓸 경우 소문자로 변경
                 $value = $item[key($item)];
 
-                $objCount = new stdClass;
-
                 if($keyName == "count(*)"){
+
                     $countStr = substr($keyName , 6 , 1);//count(뒤부터 시작되는 언어를 가져옴
                     $countSplit = explode($countStr , $keyName);//자른 언어를 기준으로 배열로 자른다.
-
 
                     $firstText = $countSplit[0] == "count(" ? "count(" : "";
 
                     if($countStr == "*"){//전체일시 괄호만
                         $lastText = ")";
                     }else{
-                        $lastText = strpos($countSplit[1] , ")") == true ? ")" : "" ;//')'포함시 ')'입력
+                       $lastText = strpos($countSplit[1] , ")") == true ? ")" : "" ;//')'포함시 ')'입력
                     }
-        
+                        
                     $text =  $firstText . $lastText;
 
                 }else{
@@ -258,7 +257,7 @@ class MySQL{ // 사용시 클래스 (AUtO) 로드 필요
             } 
             // $script = '<script>console.log("' . $errorType  . ' : '  . $text . '");</script>';
             // print_r($script);
-            print(sprintf("<pre style='background-color : 739C06; color : white; font-family : fangsong; font-weight : bold; padding : 0.2rem; white-space : pre-wrap;'>%s</pre>" , print_r($text , true)));
+            print(sprintf("<pre style='background-color : FF0000; color : white; font-family : fangsong; font-weight : bold; padding : 0.2rem; white-space : pre-wrap;'>%s</pre>" , print_r($text , true)));
         }
     }
 
