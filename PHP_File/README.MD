@@ -128,6 +128,8 @@
 |VIDEO_USE|자주 사용하는 비디오|"wmv, mpg, mp4, avi"|
 |AUDIO_USE|자주 사용하는 오디오|"mp3, mp4, flac, wav"|
 |APPLICATION_USE|자주 사용하는 애플리케이션|"docx, ppt, xlsx, xls, pptx, pdf"|
+---
+<br>
 
 **ERROR 항목**
 |ERROR NAME|ERROR CONTENT|ERROR MESSAGE|
