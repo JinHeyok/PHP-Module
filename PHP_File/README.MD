@@ -33,7 +33,7 @@
 ---
 ## 단일 파일 업로드
     - 예시문
-    $fileClass=>singleFileUpload($file, $uploadDir , "image" , false);
+    $fileClass=>singleFileUpload($file, $uploadDir , $fileClass::IMAGE_USE , false);
 > 설명
 1. singleFileUpload(파일객체, 업로드 할 경로, 파일 타입 확인 , uuid 사용여부)
 2. uuid true 시 File이름이 uuid로 변환되어 업로드, false일 경우 그대로 업로드
@@ -47,7 +47,7 @@
 ---
 ## 다중 파일 업로드
     - 예시문
-    $fileClass->multifulFileUpload($file, $uploadDir , "pdf" , false);
+    $fileClass->multifulFileUpload($file, $uploadDir , $fileClass::APPLICATION_USE , false);
 >설명
 1. multifulFileUpload(배열로 이루어진 파일 객체, 업로드 할 경로 , 파일 타입 확인 , uuid 사용여부)
 >업로드 과정
@@ -58,8 +58,10 @@
     - 예시문
     $obj = new stdClass;
     $obj->path = "" 
+
     /** @param Type Class */
     $obj->file = array("test.png" , "test2.jpg"); || $obj->file = array("/upload/test.png" , "/upload/test2.jpg");
+
     /** @param Type Array */
     $obj = array("/upload/test.png" , "/upload/test2.jpg");
     $fileClass->zipDownload($obj);
@@ -78,8 +80,10 @@
     - 예시문
     $obj = new stdClass;
     $obj->path = "" 
+
     /** @param Type Class */
     $obj->file = array("test.png" , "test2.jpg"); || $obj->file = array("/upload/test.png" , "/upload/test2.jpg");
+
     /** @param Type Array */
     $obj = array("/upload/test.png" , "/upload/test2.jpg");
     $fileClass->zipUpload($obj);
@@ -99,15 +103,45 @@
 
 ---
 
+**FILE STATUS**
+|ERROR IDNEX|ERROR CODE|ERROR MESSAGE|
+|:--:|:--:|:--:|
+|0|UPLOAD_ERR_OK|"업로드가 성공적으로 이루어졌씁니다."|
+|1|UPLOAD_ERR_INI_SIZE|"php.ini에 설정된 (upload_max_filesize) 최대 파일크기가 초과되었습니다."|
+|2|UPLOAD_ERR_FROM_SIZE|"HTML 폼에 설정된 (max_file_size) 최대 파일크기 초과"|
+|3|UPLOAD_ERR_PARTIAL|"업로드 된 파일이 부분적으로만 업르도 되었습니다."|
+|4|UPLOAD_ERR_NO_FILE|"업로드 할 피일이 없습니다."|
+|6|UPLOAD_ERR_NO_TMP_DIR|"웹서버에 임시폴더가 없습니다."|
+|7|UPLOAD_ERR_CANT_WRITE|"파일을 사용할 수 없습니다."|
+|8|UPLOAD_ERR_EXTENSION|"PHP 확장기능에 의한 업르도가 중단되었습니다."|
+---
+<br>
+
+**EXTENSION 항목**
+|OPTION|NAME|EXTENSION|
+|:--:|:--:|:--:|
+|IMAGE_ALL|모든 이미지|"tiff, jfif, bmp, gif, svg, png, jpeg, svgz, jpg, webp, ico, xbm, dib, pip, apng, tif, pjpeg, avif"|
+|VIDEO_ALL|모든 비디오|"ogm, wmv, mpg, webm, ogv, mov, asx, mpeg, mp4, m4v, avi"|
+|AUDIO_ALL|모든 오디오|"wma, flac, webm, oga, mp3, mp4, ogg, wav, opus, amr, aac"|
+|APPLICATION_ALL|모든 애플리케이션|"zip, crt, docx, xlsx, ppt, xul, apk, tar, ai, ps, rss, p7s, woff, p7z, p7c, pptx, pdf, rtf, bin, p7m, swf, xhtm, dot, swl, doc, xls, json, m3u8, epub, gz, com, rdf, js, cer, xhtml, tgz, xht, eps, crx, wasm, exe"|
+|IMAGE_USE|자주 사용하는 이미지|"bmp, gif, png, svg, jpeg, jpg"|
+|VIDEO_USE|자주 사용하는 비디오|"wmv, mpg, mp4, avi"|
+|AUDIO_USE|자주 사용하는 오디오|"mp3, mp4, flac, wav"|
+|APPLICATION_USE|자주 사용하는 애플리케이션|"docx, ppt, xlsx, xls, pptx, pdf"|
+
 **ERROR 항목**
 |ERROR NAME|ERROR CONTENT|ERROR MESSAGE|
 |:--:|:--:|:--:|
-|FILE EXTENSTION ERROR|파일이 없거나 파일 형식이 맞지 않을 때|"파일이 없거나 파일 형식이 맞지 않습니다."<br>업로드 할 확장 : "" <br> 실제 업로드 된 확장자 : "" "|
-|FILE TYPE ERROR|파일 파라미터가 형식에 맞지 않을 때|"파일 형식이 맞지 않습니다.<br>가능한 파일 타입 : ""<br>받은 파라미터 타입 : "" "|
-|MULTIFUL FILE TYPE NOT ARRAY|"멀티플 업로드할 때 배열로 넘어오지 않을 때|"파일 파라미터가 배열이 아닙니다.<br>파일 타입 : "" "|
+|FILE EXTENSTION ERROR|파일이 없거나 파일 형식이 맞지 않을 때|"파일이 없거나 파일 형식이 맞지 않습니다."<br>업로드 가능한 확장 : "" <br> 실제 업로드 된 확장자 : "" "|
+|DATA TYPE ERROR|파일 파라미터가 형식에 맞지 않을 때|"파일 형식이 맞지 않습니다.<br>가능한 파라미터 타입 : ""<br>받은 파라미터 타입 : "" "|
+|FILE EXITSTS ERROR|알집에 파일 추가중 파일이 존재하지 않을 경우|"알집파일에 파일을 추가하는 도중 오류가 발생했습니다."|
+|FILE EXTENSTION CHECK ERROR|설정된 확장자 명이 아닐 경우|"설정된 확장자 명을 넣어주세요"|
+|UPLOAD PATH ERROR|업로드 경로가 존재하지 않을 경우|"업로드 경로가 존재하지 않습니다."|
+|MULTIFUL FILE TYPE ERROR|"멀티플 업로드할 때 배열로 넘어오지 않을 때|"파일 파라미터가 배열이 아닙니다.<br>파일 타입 : "" "|
 |ZIP CREATE ERROR|알집파일을 만들 때 오류가 일어날 때|"알집 파일을 만드는데 오류가 발생했습니다."|
-|NONE FILE|파일이 없을 경우|"파일이 없습니다.<br>파일 : "" <br> 파일 타입 : "" "|
-|DEFAULT|설정된 에러 항목이 없을 시|설정된 에러 항목이 없습니다.|
+|NOT FILE|파일이 없을 경우|"파일이 없습니다.<br>파일 : "" <br> 파일 타입 : "" "|
+|NOT PATH ERROR|파일 경로가 없을 경우|"파일의 경로가 존재하지 않습니다."|
+|NONE|설정된 에러 항목이 없을 시|설정된 에러 항목이 없습니다.|
 
 ---
 

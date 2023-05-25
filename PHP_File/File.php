@@ -24,7 +24,7 @@ class File{
     *@param FILE_EXTENSTION_CHECK_ERROR : 설정된 확장자 명이 아닐 경우
     *@param MULTIFUL_FILE_TYPE_ERROR : 멀티플 업로드시 데이터 타입이 array가 아닐 경우
     *@param NOT_FILE : 파일이 없을 경우 
-    *@param NOT_PATH_ERROR : 경로가 없을 경우
+    *@param NOT_PATH_ERROR : 파일의 경로가 없을 경우
     *@param NONE : 설정된 에러 항목이 없을 경우
     */
     private const ERROR_MESSAGE = array(
@@ -36,15 +36,15 @@ class File{
         "FILE EXTENSTION CHECK ERROR" => "설정된 확장자 명을 넣어주세요.",
         "MULTIFUL FILE TYPE ERROR" => "다중 업로드 데이터 타입이 맞지 않을 경우",
         "NOT FILE" => "파일이 없습니다.",
-        "NOT PATH ERROR" => "파일의 경로가 없습니다.",
+        "NOT PATH ERROR" => "파일의 경로가 존재하지 않습니다.",
         "NONE" => "설정된 에러 항목이 없습니다.",
     );
 
     /**
      * @param file->error->UPLOAD_ERR_OK_0 : 업로드 정상완료
-     * @param file->error->UPLOAD_ERR_INI_SIZE_1 : php.ini에 설정된 최대 파일크기 초과
-     * @param file->error->UPLOAD_ERR_FORM_SIZE_2 : HTML 폼에 설정된 최대 파일크기 초과
-     * @param file->error->UPLOAD_ERR_PARTIAL_3 : 파일의 일부만 업로드 됨
+     * @param file->error->UPLOAD_ERR_INI_SIZE_1 : php.ini에 설정된(upload_max_filesize) 최대 파일크기 초과
+     * @param file->error->UPLOAD_ERR_FORM_SIZE_2 : HTML 폼에 설정된 (max_file_size) 최대 파일크기 초과
+     * @param file->error->UPLOAD_ERR_PARTIAL_3 : 업로드 된 파일이 부분적으로만 업르도 됨
      * @param file->error->UPLOAD_ERR_NO_FILE_4 : 업로드 할 파일이 없음
      * @param file->error->UPLOAD_ERR_NO_TMP_DIR_6 : 웹서버에 임시폴더가 없음
      * @param file->error->UPLOAD_ERR_CANT_WRITE_7 : 파일을 쓸 수 없음
@@ -52,9 +52,9 @@ class File{
      */
     private const FILE_ERROR_CODE = array(
         0 => "UPLOAD_ERR_OK_0 : 업로드가 정상적으로 이루어졌습니다.",
-        1 => "UPLOAD_ERR_INI_SIZE_1 : php.ini에 설정된 최대 파일크기 초과되었습니다.",
-        2 => "UPLOAD_ERR_FORM_SIZE_2 : HTML 폼에 설정된 최대 파일크기 초과되었습니다.",
-        3 => "UPLOAD_ERR_PARTIAL_3 : 파일의 일부만 업로드 되었습니다.",
+        1 => "UPLOAD_ERR_INI_SIZE_1 : php.ini에 설정된 (upload_max_filesize) 최대 파일크기 초과되었습니다.",
+        2 => "UPLOAD_ERR_FORM_SIZE_2 : HTML 폼에 설정된 (max_file_size) 최대 파일크기 초과되었습니다.",
+        3 => "UPLOAD_ERR_PARTIAL_3 : 업로드 된 파일이 부분적으로만 업르도 되었습니다.",
         4 => "UPLOAD_ERR_NO_FILE_4 : 업로드 할 파일이 없습니다.",
         6 => "UPLOAD_ERR_NO_TMP_DIR_6 : 웹서버에 임시폴더가 없습니다.",
         7 => "UPLOAD_ERR_CANT_WRITE_7 : 파일을 사용할 수 없습니다.",
@@ -158,6 +158,7 @@ class File{
                 case "FILE EXITSTS ERROR":
                     $text = "FILE EXITSTS ERROR : " . self::ERROR_MESSAGE["FILE EXITSTS ERROR"];
                     $text .= "\nFILE URL : " . $fileStatus;
+                    $text .= "\nFILE EXISTENCE : " . (is_file($fileStatus) ? "true" : self::ERROR_MESSAGE["NOT FILE"]); 
                     break;
                 case "MULTIFUL FILE TYPE ERROR":
                     $text = "MULTIFUL FILE TYPE ERROR : " . self::ERROR_MESSAGE["MULTIFUL FILE TYPE ERROR"];
@@ -185,9 +186,14 @@ class File{
             self::error_log("UPLOAD PATH ERROR");
             return false;
         }
-        
+
         if(!in_array($type , array_keys(self::EXTENSION))){
             self::error_log("FILE EXTENSTION CHECK ERROR");
+            return false;
+        }
+
+        if(gettype($file) != "array"){
+            self::error_log("DATA TYPE ERROR", "array" , $file);
             return false;
         }
 
@@ -289,7 +295,7 @@ class File{
         $file = "";
         
         if(gettype($obj) == "object"){ //오브젝트로 넘어올시 
-            $path = empty($obj->path) ? self::error_log("NOT PATH ERROR") : $obj->path;
+            $path = !is_dir($obj->path) ? self::error_log("NOT PATH ERROR") : $obj->path;
             $files = empty($obj->file) ? self::error_log("FILE EXTENSTION ERROR") : $obj->file;
         }else if(gettype($obj) == "array"){//배열로 넘어올시 (경로가 포함되어야함)
             $files = $obj;
@@ -437,6 +443,21 @@ class File{
         }else{
             self::error_log("ZIP CREATE ERROR");
         }
+    }
+
+    function deleteFile($file , $path){
+
+        if(gettype($file) != "array" || empty($file)){
+            self::error_log("DATA TYPE ERROR" , "array" , $file);
+            return false;
+        }
+
+        if(gettype($path) != "string" || empty($path)){
+            self::error_log("NOT PATH ERROR");
+            return false;
+        }
+
+
     }
 
     function allDownload($result, $path = ""){// 연속다운로드 
