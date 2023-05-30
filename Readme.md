@@ -46,4 +46,4 @@
 ### PHPMailer 모듈
 - - - 
 - 03/07 메일전송 모듈 완료 (naver 이용)
-- 04/20 README.MD 작성
+- 04/20 README.MD 작성 
