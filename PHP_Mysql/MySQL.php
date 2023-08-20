@@ -506,7 +506,7 @@ class MySQL{ // 사용시 클래스 (AUtO) 로드 필요
     }
 
 
-    function select(string $query, $data = array()){//쿼리와 삽입할 데이터(배열)
+    function select(string $query, $data = array() , $listStatus = true){//쿼리와 삽입할 데이터(배열)
 
         $bind = self::bindType($data);//data 타입에 따라 bind문장 생성
         $questionCount = substr_count($query, "?");//?수를 구함
@@ -556,7 +556,7 @@ class MySQL{ // 사용시 클래스 (AUtO) 로드 필요
         $objList = array();//객체 리스트를 담을 배열 생성
         $countCheck = self::countCheck($list); //count를 구하는지 체크
 
-        if (!empty($list) && count($list) > 1) { //배열의 길이가 1보다 낮으면 객체로 리턴 아닐 시 배열로 리턴
+        if (!empty($list) && count($list) > 1 && $listStatus = true) { //배열의 길이가 1보다 낮으면 객체로 리턴 아닐 시 배열로 리턴
             //리스트
             foreach ($list as $key => $item) {
                 $obj = new stdClass;
@@ -571,7 +571,7 @@ class MySQL{ // 사용시 클래스 (AUtO) 로드 필요
             }
             return $objList;
 
-        } else if(!empty($list) && count($list) == 1){
+        } else if(!empty($list) && count($list) == 1 $listStatus = false){
             //단일
 
             foreach ($list as $key => $item) {

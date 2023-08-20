@@ -22,7 +22,7 @@
     $db = new MySQL;
     $selectQuery = "SELECT * FROM TABLE;";
     $selectData = array();
-    $db->select($selectQuery , $selectData);
+    $db->select($selectQuery , $selectData , True Or False);
 > 설명 
 1. 원하는 정보를 불러올 Query문을 변수에 담는다.
 2. Bind 할 데이터를 배열에 넣어준다.
@@ -30,6 +30,7 @@
 - 하나의 단일 데이터일 경우 OPP(객체) 형태로 return 
 - 여러개의 데이터일 경우 OPP(객체) 형태로 배열로 return
 - COUNT()함수를 사용하여 갯수를 구하는 Query문일 경우 갯수만 Return
+- True Or False 에 따라 하나의 객체만 가져올지 아니면 배열로 가져올지를 선택 (Default = true)
 
 --- 
 ## - INSERT
