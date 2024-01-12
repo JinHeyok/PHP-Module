@@ -484,8 +484,11 @@ class MySQL{ // 사용시 클래스 (AUtO) 로드 필요
                 $statement->execute();//실제 쿼리실행
     
                 if ($statement->insert_id || $statement->affected_rows) {
+                    $response = new stdClass;
+                    $response->status = true;
+                    $response->insertId = $statement->insert_id;
                     $statement->close(); //쿼리해제
-                    return true;
+                    return $response;
                 }else{
                     self::error_log("NONE INSERT DATA");
                     $statement->close();

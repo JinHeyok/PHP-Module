@@ -61,6 +61,11 @@
     $table = "tableName";
     $insertStatus = $db->insert($insertString , $insertData , $table);
 
+    - Response 
+    $response = $db->insert(query , InsertData);
+    $response->status = {쿼리실행 상태} 
+    $response->insertId = {Insert 된 ID}
+
 > 설명
 - Object
     1. 빈 클래스를 생성한다. 
