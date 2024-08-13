@@ -92,8 +92,8 @@
 		 * @param string $secret
 		 * @return string
 		 */
-		public function getQRCodeGoogleUrl($name, $secret) {
-			$outh = 'otpauth://totp/'.$name.'?secret='.$secret.'&issuer=ninefive';
+		public function getQRCodeGoogleUrl($user, $secret) {
+			$outh = 'otpauth://totp/'.$_SERVER["HTTP_HOST"].'?secret='.$secret.'&issuer='.$user;
 			$urlencoded = urlencode($outh);
 			return 'https://api.qrserver.com/v1/create-qr-code/?size=177x177&data='.$urlencoded.'';
 		}

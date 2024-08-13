@@ -8,23 +8,18 @@
 	
 	$ga = new PHPGangsta_GoogleAuthenticator();
 	
+	// 시크릿 키는 DB에 저장해야한다.
+	// OTP를 생성할 고유 시크릿 키
 	// $secret = $ga->createSecret(); // 시크릿키 생성
 
-
-	// OTP를 생성할 고유 시크릿 키
+	// 16자리의 시크릿 키 지정
 	$secret = 'OQB6ZZGYHCPSX4AK'; //테스트를 위한 고정 시크릿키
 	
-	// 사용할 URL과 시크릿 키를 이용하여 QR코드 생성
-	$qrCodeUrl = $ga->getQRCodeGoogleUrl('http://localhost:8000', $secret);
+	// 회원,유저의 아이디와 시크릿 키를 이용하여 QR코드 생성
+	$qrCodeUrl = $ga->getQRCodeGoogleUrl($user, $secret);
 	
-	// 비교할 OTP 코드를 가져온다.
+	// 시키리킷를 가져와 비교할 OTP 코드를 가져온다.
 	$oneCode = $ga->getCode($secret);
-
-
-
-	// 로그인이 실패할 경우 OTP 초기화 하기
-	// 시간안에 로그인 할 수 없는 경우 페이지 새로고침 후 재 로그인
-	// OTP QR코드를 보여주는건 1회성?
 
 ?>
 
