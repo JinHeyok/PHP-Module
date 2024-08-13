@@ -50,3 +50,7 @@
 - - - 
 - 03/07 메일전송 모듈 완료 (naver 이용)
 - 04/20 README.MD 작성 
+
+### PHPGoogleAuth 모듈
+---
+- 08/13 Google Auth OTP 모듈 추가
